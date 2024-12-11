@@ -39,7 +39,7 @@ fi
 
 . $_PWD_PREV/export_manifest_path.sh
 
-MANIFEST_PATH_PRODUCT="$( dirname -- "${MANIFEST_PATH_PRODUCT_LAYER}" )"
+MANIFEST_PATH_PRODUCT="$(dirname -- ${MANIFEST_PATH_PRODUCT_LAYER} || echo "$MANIFEST_PATH_MACHINE_CONF_LAYER")"
 
 # check that we are where we think we are!
 if [ ! -f "$MANIFEST_PATH_POKY/oe-init-build-env" ]; then
