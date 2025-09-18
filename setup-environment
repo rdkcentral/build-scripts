@@ -158,8 +158,7 @@ esac
 sed -e "s/##DISTRO_CODENAME##/$_DISTRO_CODENAME/g" \
     -i conf/local.conf
 
-export MW_LAYER_BUILD_TYPE="MW_DEV"
-#sed -e "s/##MW_LAYER_BUILD_TYPE##/${MW_LAYER_BUILD_TYPE}/g" -i conf/local.conf
+sed -e "s/##MW_LAYER_BUILD_TYPE##/${MW_LAYER_BUILD_TYPE}/g" -i conf/local.conf
 
 #Added to install the debug tool packages
 echo 'RDK_TOOLS_PACKAGES = ""' >> conf/local.conf
