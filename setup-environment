@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################################
 
-#export MW_LAYER_BUILD_TYPE="MW_DEV"
+export MW_LAYER_BUILD_TYPE="MW_DEV"
 _PWD_PREV=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 if [ "$0" = "${BASH_SOURCE}" ]; then
