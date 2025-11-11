@@ -225,6 +225,12 @@ if ! grep MANIFEST_PATH_RDK_MIDDLEWARE_TOOLS $BUILDDIR/conf/bblayers.conf > /dev
     echo 'BBLAYERS += "${@'"'${MANIFEST_PATH_RDK_MIDDLEWARE_TOOLS}'"' if os.path.isfile('"'${MANIFEST_PATH_RDK_MIDDLEWARE_TOOLS}/conf/layer.conf'"') else '"''"'}"' >> $BUILDDIR/conf/bblayers.conf
 fi
 
+# check if MANIFEST_PATH_RDK_IOT is present in bblayers.conf , if not add it to bblayers.conf
+if ! grep MANIFEST_PATH_RDK_IOT $BUILDDIR/conf/bblayers.conf > /dev/null 2>&1; then
+    echo "Adding MANIFEST_PATH_RDK_IOT to bblayers.conf"
+        echo 'BBLAYERS += "${@'"'${MANIFEST_PATH_RDK_IOT}'"' if os.path.isfile('"'${MANIFEST_PATH_RDK_IOT}/conf/layer.conf'"') else '"''"'}"' >> $BUILDDIR/conf/bblayers.conf
+fi
+
 # Since this script is sourced, be careful not to pollute caller's environment with temp variables
 unset -f usage
 unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV _VALID_MACHINES _NCPU _BSP MACHINE _LAYERS _MACH_CONF _BSP_LAYER_REQUIRED _DISTRO_CODENAME
