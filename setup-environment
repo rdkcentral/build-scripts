@@ -194,7 +194,7 @@ echo "# Added support for generating debugfs " >> conf/local.conf
 echo "IMAGE_GEN_DEBUGFS = \"$DEBUGFS\"" >> conf/local.conf
 
 # Standardize the TARGET_VENDOR variable
-if [ -z $TARGET_VENDOR ]; then
+if [ -z "$TARGET_VENDOR" ]; then
     TARGET_VENDOR="-rdk"
 fi
 echo "# Standardize the TARGET_VENDOR variable" >> conf/local.conf
