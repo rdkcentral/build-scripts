@@ -27,6 +27,19 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 repo_forall=$SCRIPT_DIR/repo_forall.sh
 tmp_env_file=$(mktemp)
 repo forall -c "$repo_forall >> $tmp_env_file"
+# Pre-process MANIFEST_PATH_BBLAYERS_TEMPLATE to support dev and feed support in the image assembler
+manifest_lines=$(grep '^export MANIFEST_PATH_BBLAYERS_TEMPLATE=' "$tmp_env_file")
+count=$(echo "$manifest_lines" | wc -l)
+if [ "$count" -gt 1 ]; then
+    chosen_line=$(echo "$manifest_lines" | grep 'meta-rdk-images')
+    if [ -z "$chosen_line" ]; then
+        echo "Bug: Duplicated variable(s) - "
+    else
+        # Remove all existing lines and append only the chosen one
+        sed -i '/^export MANIFEST_PATH_BBLAYERS_TEMPLATE=/d' "$tmp_env_file"
+        echo "$chosen_line" >> "$tmp_env_file"
+    fi
+fi
 duplicated_variables=`cat $tmp_env_file | grep -v 'PATH=' | sed 's|=.*$||g' | sort | uniq -c | grep -v '1 export' | sed 's|^.*export ||g'`
 if [ ! -z "$duplicated_variables" ]; then
   echo
