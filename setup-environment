@@ -128,7 +128,7 @@ then
 fi
 
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
-TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/template/ source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
+TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/templates/template source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
 
 if [ "$_CONFIGS_FOUND" ]; then
     echo -e "\nConfig files already exist in folder ${_BUILDDIR}/conf/, they were not modified."
