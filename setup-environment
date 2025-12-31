@@ -123,6 +123,7 @@ fi
 
 if [ -f "${_PWD_PREV}/../manifest_vars.conf" ];
 then
+        echo "MW_LAYER_BUILD_TYPE = \"${MW_LAYER_BUILD_TYPE}\"" >> ${_PWD_PREV}/../manifest_vars.conf
         mv ${_PWD_PREV}/../manifest_vars.conf ${_BUILDDIR}/conf/manifest_vars.conf
 fi
 
@@ -156,6 +157,8 @@ esac
 
 sed -e "s/##DISTRO_CODENAME##/$_DISTRO_CODENAME/g" \
     -i conf/local.conf
+
+sed -e "s/##MW_LAYER_BUILD_TYPE##/${MW_LAYER_BUILD_TYPE}/g" -i conf/local.conf
 
 #Added to install the debug tool packages
 echo 'RDK_TOOLS_PACKAGES = ""' >> conf/local.conf
@@ -192,6 +195,15 @@ if [ -z $DEBUGFS ]; then
 fi
 echo "# Added support for generating debugfs " >> conf/local.conf
 echo "IMAGE_GEN_DEBUGFS = \"$DEBUGFS\"" >> conf/local.conf
+
+# Standardize the TARGET_VENDOR variable
+if [ -z "$TARGET_VENDOR" ]; then
+    TARGET_VENDOR="-rdk"
+fi
+echo "# Standardize the TARGET_VENDOR variable" >> conf/local.conf
+echo "# The TARGET_VENDOR variable is used to generate the folder structure for toolchain components." >> conf/local.conf
+echo "TARGET_VENDOR = \"$TARGET_VENDOR\"" >> conf/local.conf
+
 
 if [ -f ${_PWD_PREV}/../auto.conf ]; then
     ln -s ${_PWD_PREV}/../auto.conf conf/auto.conf
