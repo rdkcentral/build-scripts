@@ -59,11 +59,11 @@ for _patch_file in "${_PATCH_DIR}"/*.patch; do
     _patch_name=$(basename "$_patch_file")
 
     _layer_name="${_patch_name%.patch}"
-	if [ "$_layer_name" = "rdke-common-config" ]; then
-		_patch_target_dir="./rdke/configs/common/"
-	else
-		_patch_target_dir=$(find "$_PATCH_SEARCH_ROOT" -type d -name "$_layer_name" 2>/dev/null | head -n 1)
-	fi
+    if [ "$_layer_name" = "rdke-common-config" ]; then
+        _patch_target_dir="./rdke/configs/common/"
+    else
+        _patch_target_dir=$(find "$_PATCH_SEARCH_ROOT" -type d -name "$_layer_name" 2>/dev/null | head -n 1)
+    fi
 
     if [ -z "$_patch_target_dir" ]; then
         echo "ERROR: Could not find target directory $_layer_name under $_PATCH_SEARCH_ROOT"
