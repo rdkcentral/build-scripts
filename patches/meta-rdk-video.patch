@@ -1,33 +1,79 @@
+diff --git a/recipes-extended/entservices/entservices-appgateway.bb b/recipes-extended/entservices/entservices-appgateway.bb
+index 35991dc1..eedf4add 100644
+--- a/recipes-extended/entservices/entservices-appgateway.bb
++++ b/recipes-extended/entservices/entservices-appgateway.bb
+@@ -2,9 +2,9 @@ SUMMARY = "ENTServices AppGateway plugins"
+ LICENSE = "Apache-2.0"
+ LIC_FILES_CHKSUM = "file://LICENSE;md5=9adde9d5cb6e9c095d3e3abf0e9500f1"
+ 
+-PV = "0.2.0.0"
++PV = "0.3.1.0"
+ PR = "r0"
+-SRCREV = "41b3ed691a11435690d985816e7d617d3369f20c"
++SRCREV = "6c0b5f93f904a07d5ff0bd5a54feca7f18fe0570"
+ 
+ S = "${WORKDIR}/git"
+ inherit cmake pkgconfig
+@@ -14,6 +14,10 @@ SRC_URI = "${CMF_GITHUB_ROOT}/entservices-appgateway;${CMF_GITHUB_SRC_URI_SUFFIX
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ TOOLCHAIN = "gcc"
+ 
++#Announce as firebolt provider
++PROVIDES = "virtual/firebolt"
++RPROVIDES:${PN} = "virtual/firebolt"
++
+ DEPENDS += "wpeframework wpeframework-tools-native wpeframework-clientlibraries entservices-apis"
+ RDEPENDS:${PN} += "wpeframework entservices-apis"
+ 
 diff --git a/recipes-extended/entservices/entservices-rdkappmanagers.bb b/recipes-extended/entservices/entservices-rdkappmanagers.bb
-index 104dde6c..093314df 100644
+index 01c28232..3b26c125 100644
 --- a/recipes-extended/entservices/entservices-rdkappmanagers.bb
 +++ b/recipes-extended/entservices/entservices-rdkappmanagers.bb
-@@ -8,7 +8,7 @@ PR ?= "r0"
+@@ -8,9 +8,10 @@ PR ?= "r0"
  S = "${WORKDIR}/git"
  inherit cmake pkgconfig
  
--SRCREV = "5f147ab697d6b27c6c7e65aa7324434c6982ce2c"
-+SRCREV = "d7689a1e6de2da238ae38cebc02c867992b35cf3"
+-SRCREV = "cdc08633bc299c509dc51fc2f2fc59b865e5906b"
++SRCREV = "63b99e7bba8e48af63e44b7ac0f3357ecf928d8f"
  
  SRC_URI = "${CMF_GITHUB_ROOT}/entservices-appmanagers;${CMF_GITHUB_SRC_URI_SUFFIX}"
++#SRC_URI += "file://0100-Update-pacakgeType.patch"
  
-@@ -84,6 +84,7 @@ PACKAGECONFIG[preinstallmanager]    = "-DPLUGIN_PREINSTALL_MANAGER=ON ${PREINSTA
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ TOOLCHAIN = "gcc"
+@@ -56,6 +57,7 @@ PACKAGECONFIG ?= " telemetrysupport \
+     ${@bb.utils.contains('DISTRO_FEATURES', 'DAC-sec',              'ocicontainersec', '', d)} \
+     ${@bb.utils.contains('DISTRO_FEATURES', 'opencdm', 'opencdmi', '', d)} \
+     ${@bb.utils.contains('DISTRO_FEATURES', 'rialto_in_dac', 'rialtodac', '', d)} \
++    ${@bb.utils.contains('DISTRO_FEATURES', 'enable_ralf', ' ralfsupport', '', d)} \
+ "
+ 
+ inherit features_check
+@@ -73,13 +75,14 @@ PACKAGECONFIG[rdknativescript]      = "-DPLUGIN_NATIVEJS=ON,-DPLUGIN_NATIVEJS=OF
+ PACKAGECONFIG[opencdmi]             = "-DPLUGIN_OPENCDMI=ON"
+ PACKAGECONFIG[telemetrysupport]     = "-DBUILD_ENABLE_TELEMETRY_LOGGING=ON,,telemetry,telemetry"
+ PACKAGECONFIG[telemetry]            = "-DPLUGIN_TELEMETRY=ON,,iarmbus iarmmgrs entservices-apis rfc rbus,iarmbus entservices-apis rfc rbus"
+-PACKAGECONFIG[runtimemanager]       = "-DPLUGIN_RUNTIME_MANAGER=ON ${RUNTIMEMANAGER_PLUGIN_ARGS},-DPLUGIN_RUNTIME_MANAGER=OFF,entservices-apis,entservices-apis"
++PACKAGECONFIG[runtimemanager]       = "-DPLUGIN_RUNTIME_MANAGER=ON ${RUNTIMEMANAGER_PLUGIN_ARGS},-DPLUGIN_RUNTIME_MANAGER=OFF,entservices-apis iptables,entservices-apis iptables"
+ PACKAGECONFIG[packagemanager]       = "-DPLUGIN_PACKAGE_MANAGER=ON ${PACKAGEMANAGER_PLUGIN_ARGS} -DLIB_PACKAGE=ON -DSYSROOT_PATH=${STAGING_DIR_TARGET},-DPLUGIN_PACKAGE_MANAGER=OFF -DLIB_PACKAGE=OFF,curl virtual/libpackage,curl virtual/libpackage"
+ PACKAGECONFIG[lifecyclemanager]     = "-DPLUGIN_LIFECYCLE_MANAGER=ON,-DPLUGIN_LIFECYCLE_MANAGER=OFF,websocketpp entservices-apis,entservices-apis"
+ PACKAGECONFIG[storagemanager]       = "-DPLUGIN_STORAGE_MANAGER=ON,-DPLUGIN_STORAGE_MANAGER=OFF,entservices-apis,entservices-apis"
+ PACKAGECONFIG[appmanager]           = "-DPLUGIN_APPMANAGER=ON,-DPLUGIN_APPMANAGER=OFF,entservices-apis,entservices-apis"
+ PACKAGECONFIG[preinstallmanager]    = "-DPLUGIN_PREINSTALL_MANAGER=ON,-DPLUGIN_PREINSTALL_MANAGER=OFF,entservices-apis,entservices-apis"
  PACKAGECONFIG[downloadmanager]      = "-DPLUGIN_DOWNLOADMANAGER=ON -DLIB_PACKAGE=ON -DSYSROOT_PATH=${STAGING_DIR_TARGET},-DPLUGIN_DOWNLOADMANAGER=OFF -DLIB_PACKAGE=OFF,entservices-apis curl virtual/libpackage,entservices-apis curl virtual/libpackage"
- PACKAGECONFIG[rdkwindowmanager]     = "-DPLUGIN_RDK_WINDOW_MANAGER=ON,-DPLUGIN_RDK_WINDOW_MANAGER=OFF,rdkwindowmanager entservices-apis,rdkwindowmanager entservices-apis"
- PACKAGECONFIG[telemetrymetrics]     = "-DPLUGIN_TELEMETRYMETRICS=ON,-DPLUGIN_TELEMETRYMETRICS=OFF,entservices-apis,entservices-apis"
 +PACKAGECONFIG[ralfsupport] = "-DRALF_PACKAGE_SUPPORT=ON, -DRALF_PACKAGE_SUPPORT=OFF,ralf-utils jsoncpp, ralf-utils jsoncpp"
  # ----------------------------------------------------------------------------
  
  PACKAGEMANAGER_PLUGIN_ARGS         ?= " \
-@@ -96,6 +97,7 @@ PACKAGEMANAGER_PLUGIN_ARGS         ?= " \
-                                        -DPLUGIN_DAC_BUN_FIRM_COMP_KEY=${DAC_BUN_FIRM_COMP_KEY} \
-                                        -DPLUGIN_DAC_BUN_PLATNAME_OVERRIDE=${DAC_BUN_PLATNAME_OVERRIDE} \
-                                        -DPLUGIN_DAC_CONFIGURL=${DAC_CONFIGURL} \
-+                                       -DPLUGIN_PREINSTALL_MANAGER_APP_PREINSTALL_DIRECTORY="${APP_PREINSTALL_DIRECTORY}" \
+@@ -105,6 +108,7 @@ EXTRA_OECMAKE += " \
+     -DSECAPI_LIB=sec_api \
+     -DPLUGIN_NATIVEJS=ON \
+     -DPLUGIN_NATIVEJS_CLIENTIDENTIFIER="${NATIVEJS_CLIENTIDENTIFIER}" \
++    -DPLUGIN_PREINSTALL_MANAGER_APP_PREINSTALL_DIRECTORY="${APP_PREINSTALL_DIRECTORY}" \
  "
- RUNTIMEMANAGER_PLUGIN_ARGS         ?= " \
-                                        -DPLUGIN_RUNTIME_APP_PORTAL=${RUNTIME_APP_PORTAL} \
-@@ -142,6 +144,7 @@ do_install:append() {
+ 
+ # TBD - set SECAPI_LIB to hw secapi once RDK-12682 changes are available
+@@ -132,6 +136,7 @@ do_install:append() {
  
  FILES_SOLIBSDEV = ""
  FILES:${PN} += "${libdir}/wpeframework/plugins/*.so ${libdir}/*.so ${datadir}/WPEFramework/*"
@@ -36,7 +82,7 @@ index 104dde6c..093314df 100644
  INSANE_SKIP:${PN} += "libdir staticdev dev-so"
  INSANE_SKIP:${PN}-dbg += "libdir"
 diff --git a/recipes-extended/packager-headers/packager-headers_git.bb b/recipes-extended/packager-headers/packager-headers_git.bb
-index 2572edb3..ad1b4275 100644
+index 2572edb3..9be9c71a 100644
 --- a/recipes-extended/packager-headers/packager-headers_git.bb
 +++ b/recipes-extended/packager-headers/packager-headers_git.bb
 @@ -3,11 +3,11 @@ SUMMARY = "Package Headers"
@@ -44,17 +90,17 @@ index 2572edb3..ad1b4275 100644
  LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
  
 -PV = "1.0.0"
-+PV = "1.2.0"
  PR = "r0"
  PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
  
 -SRCREV = "1c2ea8e54b46e97c2cbcbfd1af348efea493060c"
-+SRCREV = "616ce68c5a6dc159e2869cd1679c7cfd7a2fc694"
++PV = "1.2.0"
++SRCREV = "92435d5ddb9541f25ee1887b84241d597aa37624"
  SRC_URI = "${CMF_GITHUB_ROOT}/eshelpers;${CMF_GITHUB_SRC_URI_SUFFIX};name=eshelpers"
  
  S = "${WORKDIR}/git"
 diff --git a/recipes-extended/packager-lisa/packager-lisa_git.bb b/recipes-extended/packager-lisa/packager-lisa_git.bb
-index 3c88b9e8..aececa1a 100644
+index 3c88b9e8..78875f73 100644
 --- a/recipes-extended/packager-lisa/packager-lisa_git.bb
 +++ b/recipes-extended/packager-lisa/packager-lisa_git.bb
 @@ -4,18 +4,16 @@ SECTION = "rdk/libs"
@@ -78,7 +124,7 @@ index 3c88b9e8..aececa1a 100644
  SRC_URI = "${CMF_GITHUB_ROOT}/libpackage;${CMF_GITHUB_SRC_URI_SUFFIX};name=lisapack"
  SRCREV_FORMAT = "lisapack"
  
-@@ -23,3 +21,14 @@ S = "${WORKDIR}/git"
+@@ -23,3 +21,13 @@ S = "${WORKDIR}/git"
  
  inherit cmake pkgconfig
  
@@ -90,9 +136,8 @@ index 3c88b9e8..aececa1a 100644
 +PACKAGECONFIG[depcheck]    = "-DDISABLE_DEPENDENCY_CHECK=OFF, -DDISABLE_DEPENDENCY_CHECK=ON"
 +PACKAGECONFIG[lisa]    = ",,sqlite3 boost libarchive,sqlite3 boost libarchive"
 +
-+
-+EXTRA_OECMAKE:append = " -DRDK_PACKAGE_CERT_PATH=/etc/rdk/certs -DDAC_APP_PATH=${DAC_APP_PATH}"
-+
++DAC_APP_CERT_PATH ?= "/etc/rdk/certs"
++EXTRA_OECMAKE:append = " -DRDK_PACKAGE_CERT_PATH=${DAC_APP_CERT_PATH} -DDAC_APP_PATH=${DAC_APP_PATH}"
 diff --git a/recipes-extended/sceneset/sceneset_git.bb b/recipes-extended/sceneset/sceneset_git.bb
 index 5f62935e..838c4058 100644
 --- a/recipes-extended/sceneset/sceneset_git.bb
@@ -121,26 +166,24 @@ index 5f62935e..838c4058 100644
  SYSTEMD_SERVICE:${PN} = "sceneset.service"
 +EXTRA_OECMAKE = "-DSCENESET_DEFAULT_APPNAME='${SCENESET_DEFAULT_APPNAME}'"
 diff --git a/recipes-extended/wpe-framework/entservices-apis.bb b/recipes-extended/wpe-framework/entservices-apis.bb
-index 341b25b5..47b88d2d 100644
+index f2cdbe8a..d4c09741 100644
 --- a/recipes-extended/wpe-framework/entservices-apis.bb
 +++ b/recipes-extended/wpe-framework/entservices-apis.bb
 @@ -1,7 +1,7 @@
  SUMMARY = "entservices-apis"
  LICENSE = "Apache-2.0"
  LIC_FILES_CHKSUM = "file://LICENSE;md5=d8927f3331d2b3e321b7dd1925166d25"
--PV = "3.1.0"
+-PV = "2.12.0"
 +PV = "3.2.0"
  PR = "r0"
  
  PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
-@@ -16,8 +16,8 @@ SRC_URI = "${CMF_GITHUB_ROOT}/entservices-apis;${CMF_GITHUB_SRC_URI_SUFFIX};name
- SRC_URI += "file://RDKEMW-1007.patch"
+@@ -17,7 +17,7 @@ SRC_URI += "file://RDKEMW-1007.patch"
  
  
--# Tag 3.1.0
--SRCREV_entservices-apis = "7c0d66267f6a01fb7e8847aa0108c61b614256fe"
-+# Tag 3.2.0
-+SRCREV_entservices-apis = "0b7dc77ea8f5fbb0b531699b1ceb9b3279d4d9f3"
+ # Tag 2.12.0
+-SRCREV_entservices-apis = "eae01243d0ced2ea066b4bd0b5c5f501a30565f6"
++SRCREV_entservices-apis = "bae4a2be47286463c11bdc51b526bad1e51f095a"
  
  S = "${WORKDIR}/git"
  TOOLCHAIN = "gcc"
