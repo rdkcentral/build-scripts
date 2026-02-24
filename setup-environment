@@ -57,8 +57,13 @@ echo "Checking and applying workspace patches..."
 for _patch_file in "${_PATCH_DIR}"/*.patch; do
     [ -f "$_patch_file" ] || continue
     _patch_name=$(basename "$_patch_file")
+
     _layer_name="${_patch_name%.patch}"
-    _patch_target_dir=$(find "$_PATCH_SEARCH_ROOT" -type d -name "$_layer_name" 2>/dev/null | head -n 1)
+	if [ "$_layer_name" = "rdke-common-config" ]; then
+		_patch_target_dir="./rdke/configs/common/"
+	else
+		_patch_target_dir=$(find "$_PATCH_SEARCH_ROOT" -type d -name "$_layer_name" 2>/dev/null | head -n 1)
+	fi
 
     if [ -z "$_patch_target_dir" ]; then
         echo "ERROR: Could not find target directory $_layer_name under $_PATCH_SEARCH_ROOT"
@@ -132,7 +137,7 @@ while [ -z "$MACHINE" ] && [ -z "$_CONFIGS_FOUND" ]; do
     _options=$(\ls -1 ${MANIFEST_PATH_PRODUCT}*{,/*}/conf/machine/*.conf 2>/dev/null | grep -v '\(^meta-linaro\|^meta-intel\|/qemumips\|/qemuppc\)')
     _options_count=`echo ${_options} | wc -w`
     PS3="Please enter your choice of machine [1..${_options_count}]: "
-    
+
     select opt in `echo $_options`
     do
         if [ -z "$opt" ]; then
@@ -210,10 +215,6 @@ sed -e "s/##MW_LAYER_BUILD_TYPE##/${MW_LAYER_BUILD_TYPE}/g" -i conf/local.conf
 
 #Added to install the debug tool packages
 echo 'RDK_TOOLS_PACKAGES = ""' >> conf/local.conf
-
-# Temporary change for RALF
-echo 'DISTRO_FEATURES:append = " enable_ralf "' >> conf/local.conf
-echo 'DISTRO_FEATURES:remove = " enable_cobalt_plugin "' >> conf/local.conf
 
 # Check the machine type specified
 _VALID_MACHINES=$(\ls -1 ${MANIFEST_PATH_PRODUCT}*{,/*}/conf/machine/${MACHINE}.conf 2>/dev/null | wc -l)

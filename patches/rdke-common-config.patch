@@ -1,0 +1,25 @@
+diff --git a/conf/rdke-rdkm-config.inc b/conf/rdke-rdkm-config.inc
+index 9c2cd08..cabc30b 100644
+--- a/conf/rdke-rdkm-config.inc
++++ b/conf/rdke-rdkm-config.inc
+@@ -16,11 +16,8 @@ PREFERRED_PROVIDER_virtual/default-font ?= "liberation-fonts"
+ #libpackage support for DAC applications
+ PREFERRED_PROVIDER_virtual/libpackage = "packager-lisa"
+ 
+-DISTRO_FEATURES:append = " DAC_SUPPORT"
+-DISTRO_FEATURES:append = " rdkshell"
+ DISTRO_FEATURES:append = " enable-dab"
+-DISTRO_FEATURES:append = " cobalt-25"
+-DISTRO_FEATURES:append = " enable_cobalt_plugin"
++DISTRO_FEATURES:append = " enable_ralf"
+ DISTRO_FEATURES:append = " rialto_in_dac"
+ 
+ # GDB has incompatible gplv3 license, disable by default
+@@ -49,3 +46,7 @@ DAC_BUN_FIRM_COMP_KEY ?= "1.0.0-b34e9a38a2675d4cd02cf89f7fc72874a4c99eb0-dbg"
+ DAC_BUN_PLATNAME_OVERRIDE ?= "rpi4"
+ DAC_CONFIGURL ?= "https://280222515084-rdkm-apps-resources.s3.eu-central-1.amazonaws.com/configuration/cpe.json"
+ RUNTIME_APP_PORTAL ?= "com.rdk.dac.apps"
++
++DAC_APP_CERT_PATH = "/etc/rdk/certs"
++SCENESET_DEFAULT_APPNAME ?= "com.rdkcentral.refui"
++APP_PREINSTALL_DIRECTORY ?= "/opt/preinstall"
