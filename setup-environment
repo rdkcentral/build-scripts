@@ -39,6 +39,54 @@ fi
 
 . $_PWD_PREV/export_manifest_path.sh
 
+# Temporary patch applying logic begin
+_PATCH_STATE_FILE="${_PWD_PREV}/.setup-environment-patches.state"
+_PATCH_SEARCH_ROOT="${_PWD_PREV}/../rdke"
+_PATCH_DIR="${_PWD_PREV}/patches"
+
+if [ ! -d "$_PATCH_SEARCH_ROOT" ]; then
+    _PATCH_SEARCH_ROOT="$PWD/rdke"
+fi
+
+if [ ! -d "$_PATCH_DIR" ]; then
+    _PATCH_DIR="$PWD/scripts/patches"
+fi
+
+_patch_applied_any="no"
+echo "Checking and applying workspace patches..."
+for _patch_file in "${_PATCH_DIR}"/*.patch; do
+    [ -f "$_patch_file" ] || continue
+    _patch_name=$(basename "$_patch_file")
+    _layer_name="${_patch_name%.patch}"
+    _patch_target_dir=$(find "$_PATCH_SEARCH_ROOT" -type d -name "$_layer_name" 2>/dev/null | head -n 1)
+
+    if [ -z "$_patch_target_dir" ]; then
+        echo "ERROR: Could not find target directory $_layer_name under $_PATCH_SEARCH_ROOT"
+        return 1
+    fi
+
+    if git -C "$_patch_target_dir" apply --reverse --check "$_patch_file" >/dev/null 2>&1; then
+        echo "Patch $_patch_name already present in $_patch_target_dir"
+    elif git -C "$_patch_target_dir" apply --check "$_patch_file" >/dev/null 2>&1; then
+        echo "Applying $_patch_name in $_patch_target_dir"
+        git -C "$_patch_target_dir" apply "$_patch_file" || return 1
+        _patch_applied_any="yes"
+    else
+        echo "ERROR: Patch $_patch_name does not apply cleanly in $_patch_target_dir"
+        return 1
+    fi
+done
+
+date '+applied_at=%Y-%m-%d %H:%M:%S' > "$_PATCH_STATE_FILE"
+if [ "$_patch_applied_any" = "yes" ]; then
+    echo "Patch set applied successfully."
+else
+    echo "Patch set already applied."
+fi
+
+unset _PATCH_STATE_FILE _PATCH_SEARCH_ROOT _PATCH_DIR _patch_file _patch_name _layer_name _patch_target_dir _patch_applied_any
+# Temporary patch applying logic ends
+
 MANIFEST_PATH_PRODUCT="$(dirname -- ${MANIFEST_PATH_PRODUCT_LAYER} || echo "$MANIFEST_PATH_MACHINE_CONF_LAYER")"
 
 # check that we are where we think we are!

@@ -1,0 +1,146 @@
+diff --git a/recipes-extended/entservices/entservices-rdkappmanagers.bb b/recipes-extended/entservices/entservices-rdkappmanagers.bb
+index 104dde6c..093314df 100644
+--- a/recipes-extended/entservices/entservices-rdkappmanagers.bb
++++ b/recipes-extended/entservices/entservices-rdkappmanagers.bb
+@@ -8,7 +8,7 @@ PR ?= "r0"
+ S = "${WORKDIR}/git"
+ inherit cmake pkgconfig
+ 
+-SRCREV = "5f147ab697d6b27c6c7e65aa7324434c6982ce2c"
++SRCREV = "d7689a1e6de2da238ae38cebc02c867992b35cf3"
+ 
+ SRC_URI = "${CMF_GITHUB_ROOT}/entservices-appmanagers;${CMF_GITHUB_SRC_URI_SUFFIX}"
+ 
+@@ -84,6 +84,7 @@ PACKAGECONFIG[preinstallmanager]    = "-DPLUGIN_PREINSTALL_MANAGER=ON ${PREINSTA
+ PACKAGECONFIG[downloadmanager]      = "-DPLUGIN_DOWNLOADMANAGER=ON -DLIB_PACKAGE=ON -DSYSROOT_PATH=${STAGING_DIR_TARGET},-DPLUGIN_DOWNLOADMANAGER=OFF -DLIB_PACKAGE=OFF,entservices-apis curl virtual/libpackage,entservices-apis curl virtual/libpackage"
+ PACKAGECONFIG[rdkwindowmanager]     = "-DPLUGIN_RDK_WINDOW_MANAGER=ON,-DPLUGIN_RDK_WINDOW_MANAGER=OFF,rdkwindowmanager entservices-apis,rdkwindowmanager entservices-apis"
+ PACKAGECONFIG[telemetrymetrics]     = "-DPLUGIN_TELEMETRYMETRICS=ON,-DPLUGIN_TELEMETRYMETRICS=OFF,entservices-apis,entservices-apis"
++PACKAGECONFIG[ralfsupport] = "-DRALF_PACKAGE_SUPPORT=ON, -DRALF_PACKAGE_SUPPORT=OFF,ralf-utils jsoncpp, ralf-utils jsoncpp"
+ # ----------------------------------------------------------------------------
+ 
+ PACKAGEMANAGER_PLUGIN_ARGS         ?= " \
+@@ -96,6 +97,7 @@ PACKAGEMANAGER_PLUGIN_ARGS         ?= " \
+                                        -DPLUGIN_DAC_BUN_FIRM_COMP_KEY=${DAC_BUN_FIRM_COMP_KEY} \
+                                        -DPLUGIN_DAC_BUN_PLATNAME_OVERRIDE=${DAC_BUN_PLATNAME_OVERRIDE} \
+                                        -DPLUGIN_DAC_CONFIGURL=${DAC_CONFIGURL} \
++                                       -DPLUGIN_PREINSTALL_MANAGER_APP_PREINSTALL_DIRECTORY="${APP_PREINSTALL_DIRECTORY}" \
+ "
+ RUNTIMEMANAGER_PLUGIN_ARGS         ?= " \
+                                        -DPLUGIN_RUNTIME_APP_PORTAL=${RUNTIME_APP_PORTAL} \
+@@ -142,6 +144,7 @@ do_install:append() {
+ 
+ FILES_SOLIBSDEV = ""
+ FILES:${PN} += "${libdir}/wpeframework/plugins/*.so ${libdir}/*.so ${datadir}/WPEFramework/*"
++FILES:${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'enable_ralf', '${datadir}/*', '', d)}"
+ 
+ INSANE_SKIP:${PN} += "libdir staticdev dev-so"
+ INSANE_SKIP:${PN}-dbg += "libdir"
+diff --git a/recipes-extended/packager-headers/packager-headers_git.bb b/recipes-extended/packager-headers/packager-headers_git.bb
+index 2572edb3..ad1b4275 100644
+--- a/recipes-extended/packager-headers/packager-headers_git.bb
++++ b/recipes-extended/packager-headers/packager-headers_git.bb
+@@ -3,11 +3,11 @@ SUMMARY = "Package Headers"
+ LICENSE = "Apache-2.0"
+ LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
+ 
+-PV = "1.0.0"
++PV = "1.2.0"
+ PR = "r0"
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ 
+-SRCREV = "1c2ea8e54b46e97c2cbcbfd1af348efea493060c"
++SRCREV = "616ce68c5a6dc159e2869cd1679c7cfd7a2fc694"
+ SRC_URI = "${CMF_GITHUB_ROOT}/eshelpers;${CMF_GITHUB_SRC_URI_SUFFIX};name=eshelpers"
+ 
+ S = "${WORKDIR}/git"
+diff --git a/recipes-extended/packager-lisa/packager-lisa_git.bb b/recipes-extended/packager-lisa/packager-lisa_git.bb
+index 3c88b9e8..aececa1a 100644
+--- a/recipes-extended/packager-lisa/packager-lisa_git.bb
++++ b/recipes-extended/packager-lisa/packager-lisa_git.bb
+@@ -4,18 +4,16 @@ SECTION = "rdk/libs"
+ LICENSE = "Apache-2.0"
+ LIC_FILES_CHKSUM = "file://LICENSE;md5=175792518e4ac015ab6696d16c4f607e"
+ 
+-PV = "1.0.0"
++PV = "1.2.2"
+ PR = "r0"
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ 
+ PROVIDES = "virtual/libpackage"
+ RPROVIDES:${PN} = "virtual/libpackage"
+ 
+-DEPENDS = "sqlite3 boost libarchive"
+ DEPENDS += "packager-headers"
+-RDEPENDS_${PN} = " sqlite3 boost libarchive"
+ 
+-SRCREV = "53fea63b4fb6e5491364781dcdfd91bcc47397f8"
++SRCREV = "79d57fa660c0772463ff497567a19a740002468e"
+ SRC_URI = "${CMF_GITHUB_ROOT}/libpackage;${CMF_GITHUB_SRC_URI_SUFFIX};name=lisapack"
+ SRCREV_FORMAT = "lisapack"
+ 
+@@ -23,3 +21,14 @@ S = "${WORKDIR}/git"
+ 
+ inherit cmake pkgconfig
+ 
++PACKAGECONFIG ?= " \
++    ${@bb.utils.contains('DISTRO_FEATURES', 'enable_ralf', 'ralfsupport', '', d)} \
++    ${@bb.utils.contains('DISTRO_FEATURES', 'DAC_SUPPORT', 'lisa', '', d)} \
++    "
++PACKAGECONFIG[ralfsupport]    = "-DENABLE_RALF_SUPPORT=ON -DDAC_APP_PATH=${DAC_APP_PATH}, -DENABLE_RALF_SUPPORT=OFF, ralf-utils jsoncpp, ralf-utils jsoncpp"
++PACKAGECONFIG[depcheck]    = "-DDISABLE_DEPENDENCY_CHECK=OFF, -DDISABLE_DEPENDENCY_CHECK=ON"
++PACKAGECONFIG[lisa]    = ",,sqlite3 boost libarchive,sqlite3 boost libarchive"
++
++
++EXTRA_OECMAKE:append = " -DRDK_PACKAGE_CERT_PATH=/etc/rdk/certs -DDAC_APP_PATH=${DAC_APP_PATH}"
++
+diff --git a/recipes-extended/sceneset/sceneset_git.bb b/recipes-extended/sceneset/sceneset_git.bb
+index 5f62935e..838c4058 100644
+--- a/recipes-extended/sceneset/sceneset_git.bb
++++ b/recipes-extended/sceneset/sceneset_git.bb
+@@ -3,7 +3,7 @@ SUMMARY = "This recipe provides the sceneset component for RDK "
+ LICENSE = "Apache-2.0"
+ LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
+ 
+-PV = "0.1.0"
++PV = "0.2.0"
+ PR = "r0"
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ 
+@@ -11,7 +11,7 @@ inherit cmake pkgconfig systemd
+ 
+ DEPENDS += "wpeframework entservices-apis"
+ 
+-SRCREV = "bd0bfe2c11788158b8025756d6b61f38304177a7"
++SRCREV = "18d540d6d0407506c71d4257743ebe8b73266997"
+ SRC_URI = "${CMF_GITHUB_ROOT}/sceneset;${CMF_GITHUB_SRC_URI_SUFFIX};name=sceneset"
+ SRCREV_FORMAT = "sceneset"
+ 
+@@ -26,3 +26,4 @@ FILES:${PN} += "${bindir}/*"
+ FILES:${PN} += "${systemd_unitdir}/system/*"
+ 
+ SYSTEMD_SERVICE:${PN} = "sceneset.service"
++EXTRA_OECMAKE = "-DSCENESET_DEFAULT_APPNAME='${SCENESET_DEFAULT_APPNAME}'"
+diff --git a/recipes-extended/wpe-framework/entservices-apis.bb b/recipes-extended/wpe-framework/entservices-apis.bb
+index 341b25b5..47b88d2d 100644
+--- a/recipes-extended/wpe-framework/entservices-apis.bb
++++ b/recipes-extended/wpe-framework/entservices-apis.bb
+@@ -1,7 +1,7 @@
+ SUMMARY = "entservices-apis"
+ LICENSE = "Apache-2.0"
+ LIC_FILES_CHKSUM = "file://LICENSE;md5=d8927f3331d2b3e321b7dd1925166d25"
+-PV = "3.1.0"
++PV = "3.2.0"
+ PR = "r0"
+ 
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+@@ -16,8 +16,8 @@ SRC_URI = "${CMF_GITHUB_ROOT}/entservices-apis;${CMF_GITHUB_SRC_URI_SUFFIX};name
+ SRC_URI += "file://RDKEMW-1007.patch"
+ 
+ 
+-# Tag 3.1.0
+-SRCREV_entservices-apis = "7c0d66267f6a01fb7e8847aa0108c61b614256fe"
++# Tag 3.2.0
++SRCREV_entservices-apis = "0b7dc77ea8f5fbb0b531699b1ceb9b3279d4d9f3"
+ 
+ S = "${WORKDIR}/git"
+ TOOLCHAIN = "gcc"

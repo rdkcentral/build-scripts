@@ -1,0 +1,39 @@
+diff --git a/recipes-core/packagegroups/packagegroup-middleware-layer.bb b/recipes-core/packagegroups/packagegroup-middleware-layer.bb
+index d185250a..25286fd3 100644
+--- a/recipes-core/packagegroups/packagegroup-middleware-layer.bb
++++ b/recipes-core/packagegroups/packagegroup-middleware-layer.bb
+@@ -15,7 +15,6 @@ PR = "r0"
+ 
+ #Generic components
+ RDEPENDS:${PN} = " \
+-    aamp \
+     audiocapturemgr \
+     bluetooth-core \
+     bluetooth-mgr \
+@@ -95,13 +94,9 @@ RDEPENDS:${PN} = " \
+     ucresolv \
+     webconfig-framework\
+     wdmp-c \
+-    wpe-backend-rdk \
+     wpeframework \
+     wpeframework-clientlibraries \
+     entservices-apis \
+-    wpeframework-ui \
+-    wpe-webkit \
+-    wpe-webkit-web-inspector-plugin \
+     wrp-c \
+     xdial \
+     xr-voice-sdk \
+@@ -115,12 +110,10 @@ RDEPENDS:${PN} = " \
+     dnsmasq \
+     dropbear \
+     libopus \
+-    libwpe \
+     mdns \
+     mtd-utils \
+     nopoll \
+     trower-base64 \
+-    webkitbrowser-plugin \
+     mfr-utils \
+     webcfg \
+     systimemgrfactory \
