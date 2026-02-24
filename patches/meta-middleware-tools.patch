@@ -60,29 +60,3 @@ index 0000000..8b13789
 +++ b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.p12
 @@ -0,0 +1 @@
 +
-diff --git a/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb b/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb
-index 3120c32..d944d85 100644
---- a/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb
-+++ b/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb
-@@ -7,7 +7,7 @@ S = "${WORKDIR}/pbt"
- 
- 
- 
--SRC_URI = "${RDK_ARTIFACTS_BASE_URL}/rdkm-rdke-prebuilts/entservices-rdkwmgr/lib32-entservices-rdkwmgr_${PV}.tar.gz;subdir=pbt"
-+SRC_URI = "https://artifactory.rdkcentral.com/artifactory/rdkm-rdke-prebuilts/entservices-rdkwmgr/lib32-entservices-rdkwmgr_3.20.0.tar.gz;subdir=pbt"
- SRC_URI[sha256sum] = "4f098fb8d519b07e3fa31cedaf5bf599bae8bf2c5c9f33a7e1c89a01d0343be5"
- PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
- do_install () {
-diff --git a/recipes-transit/rdkwindowmanager/rdkwindowmanager_git.bb b/recipes-transit/rdkwindowmanager/rdkwindowmanager_git.bb
-index b132dba..26ce2a1 100644
---- a/recipes-transit/rdkwindowmanager/rdkwindowmanager_git.bb
-+++ b/recipes-transit/rdkwindowmanager/rdkwindowmanager_git.bb
-@@ -6,7 +6,7 @@ PV = "1.9.0"
- PR = "r0"
- S = "${WORKDIR}/pbt"
- 
--SRC_URI = "${RDK_ARTIFACTS_BASE_URL}/rdkm-rdke-prebuilts/rdkwindowmanager/lib32-rdkwindowmanager_${PV}.tar.gz;subdir=pbt"
-+SRC_URI = "https://artifactory.rdkcentral.com/artifactory/rdkm-rdke-prebuilts/rdkwindowmanager/lib32-rdkwindowmanager_1.9.0.tar.gz;subdir=pbt"
- SRC_URI[sha256sum] = "1452dd12137946a50889b2d8a123760a7bb19e36289a9ca6ddd33a74321f2d70"
- 
- do_install() {
