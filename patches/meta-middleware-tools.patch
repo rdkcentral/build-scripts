@@ -41,131 +41,25 @@ index 0000000..fcd8df7
 +FILES:${PN} += "${sysconfdir}/rdk/certs"
 diff --git a/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.crt b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.crt
 new file mode 100755
-index 0000000..24ab111
+index 0000000..8b13789
 --- /dev/null
 +++ b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.crt
-@@ -0,0 +1,25 @@
-+-----BEGIN CERTIFICATE-----
-+MIIEHTCCAwWgAwIBAgIUf39sGHDaSRKAoAZbK196Y5g7lcwwDQYJKoZIhvcNAQEL
-+BQAwgZ0xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJQQTEVMBMGA1UEBwwMUGhpbGFk
-+ZWxwaGlhMRcwFQYDVQQKDA5SREtDRU5UUkFMIExMQzENMAsGA1UECwwEUkRLTTEb
-+MBkGA1UEAwwSd3d3LnJka2NlbnRyYWwuY29tMSUwIwYJKoZIhvcNAQkBFhZzdXBw
-+b3J0QHJka2NlbnRyYWwuY29tMB4XDTI2MDIwNjE4MjgzMloXDTM2MDIwNDE4Mjgz
-+MlowgZ0xCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJQQTEVMBMGA1UEBwwMUGhpbGFk
-+ZWxwaGlhMRcwFQYDVQQKDA5SREtDRU5UUkFMIExMQzENMAsGA1UECwwEUkRLTTEb
-+MBkGA1UEAwwSd3d3LnJka2NlbnRyYWwuY29tMSUwIwYJKoZIhvcNAQkBFhZzdXBw
-+b3J0QHJka2NlbnRyYWwuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
-+AQEAy5vWeIxfqXZq87b0L5ywK2VQ6VhuzF+XDSrhXHRzgmUDp5JtY8YasHEpFeRq
-+OGjJud4IoVWSyqgv3ONUB4KRpKtH6FcVwDgPCyEqwX6uZCVvTJ2SZ4XDdXo7oDvV
-+IwO80U+jzTDBlZXiWWQ/YxwKeoXOfa7L4YfTxeVTJ21kYAp/G5MtGia0hIAVHfPn
-+FOhnzwlH+RMwgpSGOMhn89MnGrDVwybfhLLqahRVLlTD+XZxozI37o10MuGllI82
-+Ka4a5ZWGM0MK7eTZ5RYsza01xPwa+cZ+QxgXjQInANy9x5yGOaxIfj0UYaOW5tFF
-+3PZlkVy/ZKkSiQC+39Mk/ZBWJQIDAQABo1MwUTAdBgNVHQ4EFgQU2yKJVB3Dqta7
-+2vHNxCLXsMyVgeAwHwYDVR0jBBgwFoAU2yKJVB3Dqta72vHNxCLXsMyVgeAwDwYD
-+VR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAVXEe651WMtw+YKYmk/rT
-+53CnAd9GPte40e1IFM/HIIjVZXwxJlAL4u6qtMudQhd/TciFxuzKsDElfk2XsctY
-+P/31Hz8C8qQcwcR+PmUJROA3Vjt7Wl3t8rIIWGD0CIJxn3Lf0hQ24P2l26739URb
-+Aremi3wScV4EsEJeYXY7GDU9xT6G/vxRynwrXZjiwmsadYwonyuOYp8kr/l2Ab3n
-+3x+85b0QpK6YbshUpsTtIesjLj7FO/j9Kp0hikgbxdmCuTGLnmgiYl8IGJowmceT
-+cwqQZe3BAmqp4SpWsiu7lwNKLHSLQgSpj5DNNQ6BSgkjmAO9YBtvu8LPhpklG4nJ
-+pg==
-+-----END CERTIFICATE-----
+@@ -0,0 +1 @@
++
 diff --git a/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.key b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.key
 new file mode 100755
-index 0000000..cc2849c
+index 0000000..8b13789
 --- /dev/null
 +++ b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.key
-@@ -0,0 +1,28 @@
-+-----BEGIN PRIVATE KEY-----
-+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDLm9Z4jF+pdmrz
-+tvQvnLArZVDpWG7MX5cNKuFcdHOCZQOnkm1jxhqwcSkV5Go4aMm53gihVZLKqC/c
-+41QHgpGkq0foVxXAOA8LISrBfq5kJW9MnZJnhcN1ejugO9UjA7zRT6PNMMGVleJZ
-+ZD9jHAp6hc59rsvhh9PF5VMnbWRgCn8bky0aJrSEgBUd8+cU6GfPCUf5EzCClIY4
-+yGfz0ycasNXDJt+EsupqFFUuVMP5dnGjMjfujXQy4aWUjzYprhrllYYzQwrt5Nnl
-+FizNrTXE/Br5xn5DGBeNAicA3L3HnIY5rEh+PRRho5bm0UXc9mWRXL9kqRKJAL7f
-+0yT9kFYlAgMBAAECggEAMVx5ORXs/jAxex7MYbuWoRqprDyOdfkprV1LL+cidscH
-+BQnUf8cQAt0YRRCwaLcMysUHqhdNJFj0a5RoM37l0LpejzcHlKdyjDPxAeJ0pF5H
-+9pbP3s2YxoMI8A55XEkEbmkkkLMEh3+EFcBeNqieaLhGSIWHM4jCoFw5ldopJrgN
-+nd1meOnZvx3dG0MKOREiOf7kRxVWGGC3iigmEhpcQWewEyf/sbsjIFs76EFnZo/9
-+XfLoK26OqYURwVdSBlofzVvunPMtt88HVhSBplDhlkw2WUD/mGrpCvyDgQo+und6
-+v9P7DoljHE6G8VGGdhlDqH6r/+IXpGgMcspEEu7L4QKBgQD49d3jiUQEcwYCcq5d
-+xJl28EScOza3uTmHt1oLuq4fWKorq4GJd1DyBUstNA5mDIxs3rSxaS/56YSDD98w
-+xPWzbbG0tTP8fBTdUR/y3I/O7X3ZpV+0KldmKfs9tIyJlZgSaLek56WM+8GfpDi1
-+oE7zoGEclrzlsUztN8CTmrBZ4QKBgQDRXa/V/V2yQ54GQqaL0k5+OjeRqO3f4Aho
-+GuuMBWJdbZK1/GX640uh7xYAKvIhz2PCDfieixbpS/M+KzrErb50uq03qO34fMf2
-+2zS4GQqNNwUDmV2ai8F+wkV00NCTgXPvguDtW/WUVU4AG8DP4zOi2MXHpyJZYK4Y
-+6rTdFnisxQKBgQCpQSYgCfMW/0gHpAXNM9qNlN1gRZV2pFNrZAiwzrKQFwxh8hB3
-+74k1cMniKnDbig5x+ZpovrViNxLis4iuNElCOgJFc6erMIRSzlNlHfQa3zTfIeIF
-+r3+JsmLfWX7uDqi7YzvuvZm8VnAVY2U2fY0Pbmp3MDeuBLLi1zNyZgkcoQKBgQCf
-+wOQF3bGb73pp/nuEnzGjoZp7O7JerFzdywTGr+kRryVOVcwe90bjxkI8WIivgcb1
-+8KEvoKQX2gs9+dB6+LQl77dyjCUhAV23oCYG/5yMiln6GBFTdqZrqaND8n3kv9eN
-+/4jPtOabi8fbz1F9jzj8Xnnz0TUli97sRlNBi/8CnQKBgHL183c3aWQAJ5mvv3In
-+OAC/eJtGXjaNSd/mP5dtfcKU7IxmpMSX7SvhBLG72+m9bkQxgVCTEEjkVQrfGZxM
-+QvQrdRdc5+f6NjFvpzZt3JKc1phJPKgIqCCEkPCWY0GI4ydD8yCfPlqrDEHHU06J
-+ittldCv7T3F1ky3TKgliIbbj
-+-----END PRIVATE KEY-----
+@@ -0,0 +1 @@
++
 diff --git a/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.p12 b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.p12
 new file mode 100755
-index 0000000000000000000000000000000000000000..92e1b8d5127be35351400ce638078d9e30aea471
-GIT binary patch
-literal 2803
-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
-
-literal 0
-HcmV?d00001
-
+index 0000000..8b13789
+--- /dev/null
++++ b/recipes-transit/app-cert-installer/app-cert-installer/com.rdkcentral.ralf.p12
+@@ -0,0 +1 @@
++
 diff --git a/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb b/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb
 index 3120c32..d944d85 100644
 --- a/recipes-transit/entservices-rdkwmgr/entservices-rdkwmgr_git.bb
