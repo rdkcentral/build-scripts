@@ -211,6 +211,10 @@ sed -e "s/##MW_LAYER_BUILD_TYPE##/${MW_LAYER_BUILD_TYPE}/g" -i conf/local.conf
 #Added to install the debug tool packages
 echo 'RDK_TOOLS_PACKAGES = ""' >> conf/local.conf
 
+# Temporary change for RALF
+echo 'DISTRO_FEATURES:append = " enable_ralf "' >> conf/local.conf
+echo 'DISTRO_FEATURES:remove = " enable_cobalt_plugin "' >> conf/local.conf
+
 # Check the machine type specified
 _VALID_MACHINES=$(\ls -1 ${MANIFEST_PATH_PRODUCT}*{,/*}/conf/machine/${MACHINE}.conf 2>/dev/null | wc -l)
 if [ "$_VALID_MACHINES" -eq 0 ]; then
