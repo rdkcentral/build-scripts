@@ -158,6 +158,11 @@ esac
 sed -e "s/##DISTRO_CODENAME##/$_DISTRO_CODENAME/g" \
     -i conf/local.conf
 
+if [ "$_DISTRO_CODENAME" = "kirkstone" ]; then
+    echo '# Use SPDX identifiers for incompatible licenses on kirkstone builds' >> conf/local.conf
+    echo 'INCOMPATIBLE_LICENSE:forcevariable = "LGPL-3.0-or-later LGPL-3.0-only GPL-3.0-or-later GPL-3.0-only"' >> conf/local.conf
+fi
+
 sed -e "s/##MW_LAYER_BUILD_TYPE##/${MW_LAYER_BUILD_TYPE}/g" -i conf/local.conf
 
 #Added to install the debug tool packages

@@ -48,8 +48,22 @@ if [ ! -z "$duplicated_variables" ]; then
   exit 2
 fi
 source $tmp_env_file
-# Take the env file, remove the export, add spacing on the =, and add quotes
-# e.g. export MANIFEST_PATH_SCRIPTS=/home/ppl22/RDK-E/<Machine>/scripts to MANIFEST_PATH_SCRIPTS = "/home/ppl22/RDK-E/<Machine>/scripts"
-# This can then be used in the conf files for yocto
-cat $tmp_env_file | sed 's/export //g' | sed 's/=/ = /g' | sed 's/\(=[[:blank:]]*\)\(.*\)/\1"\2"/' > ./manifest_vars.conf
+# Generate manifest paths relative to the repo root so the same build directory
+# works both on the host and inside the yocto docker mount.
+repo_root=$(cd "$SCRIPT_DIR/.." && pwd)
+while IFS='=' read -r key value; do
+    [ -n "$key" ] || continue
+    key=${key#export }
+    if [ "$key" = "MW_LAYER_BUILD_TYPE" ]; then
+        printf '%s = "%s"\n' "$key" "$value"
+        continue
+    fi
+
+    relative_path=$(realpath --relative-to="$repo_root" "$value" 2>/dev/null || true)
+    if [ -n "$relative_path" ] && [ "$relative_path" != "." ]; then
+        printf '%s = "${RDKROOT}/%s"\n' "$key" "$relative_path"
+    else
+        printf '%s = "%s"\n' "$key" "$value"
+    fi
+done < "$tmp_env_file" > ./manifest_vars.conf
 rm $tmp_env_file
