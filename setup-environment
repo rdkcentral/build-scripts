@@ -122,7 +122,8 @@ if [ ! -d "$_BUILDDIR/conf" ]; then
 fi
 
 # Derive build type from DEVELOPMENT_BUILD / OSS_DEVELOPMENT_BUILD if not already set
-[ -z "$MW_LAYER_BUILD_TYPE" ] && { [ "$DEVELOPMENT_BUILD" = "true" ] && MW_LAYER_BUILD_TYPE='MW_DEV' || MW_LAYER_BUILD_TYPE='MW_FEED'; }
+# OSS dev mode implies MW dev mode (vendor + MW both built from source)
+[ -z "$MW_LAYER_BUILD_TYPE" ] && { { [ "$DEVELOPMENT_BUILD" = "true" ] || [ "$OSS_DEVELOPMENT_BUILD" = "true" ]; } && MW_LAYER_BUILD_TYPE='MW_DEV' || MW_LAYER_BUILD_TYPE='MW_FEED'; }
 [ -z "$OSS_LAYER_BUILD_TYPE" ] && { [ "$OSS_DEVELOPMENT_BUILD" = "true" ] && OSS_LAYER_BUILD_TYPE='OSS_DEV' || OSS_LAYER_BUILD_TYPE='OSS_FEED'; }
 
 if [ -f "${_PWD_PREV}/../manifest_vars.conf" ];
