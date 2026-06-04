@@ -143,7 +143,7 @@ if [ "$_CONFIGS_FOUND" ]; then
 fi
 
 #add this change to build vdevice and changes will apply only for vdevice
-if [ -n "$_CUSTOM_LOCALCONF" ]; then
+if [ -f "$_CUSTOM_LOCALCONF" ]; then
     cp -f "$_CUSTOM_LOCALCONF" conf/local.conf
     echo -e "\nUsing product-layer local.conf from: $_CUSTOM_LOCALCONF"
 fi
