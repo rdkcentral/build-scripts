@@ -126,6 +126,12 @@ then
         mv ${_PWD_PREV}/../manifest_vars.conf ${_BUILDDIR}/conf/manifest_vars.conf
 fi
 
+#add this change to build vdevice and changes will apply only for vdevice
+_CUSTOM_LOCALCONF=
+if [[ "${MANIFEST_PATH_PRODUCT_LAYER}" == *"vdevice"* ]] && [ -f "${MANIFEST_PATH_PRODUCT_LAYER}/conf/template/local.conf.sample" ]; then
+    _CUSTOM_LOCALCONF="${MANIFEST_PATH_PRODUCT_LAYER}/conf/template/local.conf.sample"
+fi
+
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
 TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/template/ source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
 
@@ -134,6 +140,12 @@ if [ "$_CONFIGS_FOUND" ]; then
     unset -f usage
     unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV MACHINE
     return 0
+fi
+
+#add this change to build vdevice and changes will apply only for vdevice
+if [ -n "$_CUSTOM_LOCALCONF" ]; then
+    cp -f "$_CUSTOM_LOCALCONF" conf/local.conf
+    echo -e "\nUsing product-layer local.conf from: $_CUSTOM_LOCALCONF"
 fi
 
 # Determine DISTRO_CODENAME from the bitbake version
@@ -219,4 +231,4 @@ fi
 
 # Since this script is sourced, be careful not to pollute caller's environment with temp variables
 unset -f usage
-unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV _VALID_MACHINES _NCPU _BSP MACHINE _LAYERS _MACH_CONF _BSP_LAYER_REQUIRED _DISTRO_CODENAME
+unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV _VALID_MACHINES _NCPU _BSP MACHINE _LAYERS _MACH_CONF _BSP_LAYER_REQUIRED _DISTRO_CODENAME _CUSTOM_LOCALCONF
