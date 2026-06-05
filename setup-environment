@@ -137,6 +137,16 @@ if [ "$_CONFIGS_FOUND" ]; then
     return 0
 fi
 
+# Product-layer custom local.conf override (vdevice layers ONLY)
+# For product layers containing 'vdevice' in the path, use custom local.conf from the product layer
+# instead of the default TEMPLATECONF template. Other product layers continue to use default behavior.
+# This allows vdevice-specific configurations to be maintained in the product layer itself.
+
+if [[ "${MANIFEST_PATH_PRODUCT_LAYER}" == *"vdevice"* ]] && [ -f "${MANIFEST_PATH_PRODUCT_LAYER}/conf/template/local.conf.sample" ]; then
+    cp -f "${MANIFEST_PATH_PRODUCT_LAYER}/conf/template/local.conf.sample" conf/local.conf
+    echo -e "\nUsing product-layer local.conf from: ${MANIFEST_PATH_PRODUCT_LAYER}/conf/template/local.conf.sample"
+fi
+
 # Determine DISTRO_CODENAME from the bitbake version
 # Warning: The RDK has historically combined bitbake 1.28 (ie the version of
 # bitbake released with OE 2.0) with OE 1.6. We need to account for that here,
