@@ -130,6 +130,44 @@ fi
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
 TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/template/ source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
 
+
+#CVE sha  generation
+
+echo "CVE compatiblity Check.."
+LOCAL_CONF="$(pwd)/conf/local.conf"
+if [ ! -f "$LOCAL_CONF" ] || \
+    grep -Ev '^[[:space:]]*#' "$LOCAL_CONF" | grep -q 'INHERIT.*cve-check'; then
+        echo "CVE Feature Enabled/New build"
+        echo "Generating Vendor SHA include file[dynamic_sha.inc]."
+        DYNAMIC_SHA_FILE="${PWD}/conf/dynamic_sha.inc"
+	if [ -f "$DYNAMIC_SHA_FILE" ]; then
+		echo "Removing existing dynamic_sha.inc"
+		rm -f "$DYNAMIC_SHA_FILE"
+	fi
+
+	#SCRIPT="${_PWD_PREV}/../rdke/vendor/meta-vendor-release/conf/machine/include/generate_sha256.sh"
+	SCRIPT="${_PWD_PREV}/generate_sha256.sh"
+	echo "SCRIPT=$SCRIPT"
+	BITBAKE_ENV_FILE="${PWD}/conf/bitbake.env"
+
+	echo "env path=$BITBAKE_ENV_FILE"
+	echo "Generating BitBake environment..."
+	bitbake -e rdk-fullstack-image > "$BITBAKE_ENV_FILE"
+	if [ $? -ne 0 ]; then
+		echo "ERROR: Failed to generate bitbake.env"
+		return 1
+	fi
+
+	if [ -f "$SCRIPT" ]; then
+            sh "$SCRIPT" "$BITBAKE_ENV_FILE" "$DYNAMIC_SHA_FILE"
+        else
+            echo "WARNING: $SCRIPT not found"
+	fi
+else
+    echo "CVE not enabled. Skipping vendor SHA generation."
+fi
+#CVE block end
+
 if [ "$_CONFIGS_FOUND" ]; then
     echo -e "\nConfig files already exist in folder ${_BUILDDIR}/conf/, they were not modified."
     unset -f usage
