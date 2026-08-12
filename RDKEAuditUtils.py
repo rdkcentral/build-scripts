@@ -402,8 +402,8 @@ class RDKELayerInterface:
         self.package_info_cache = dict()  # RDKEPackageInfo indexed by ipkfile name
         self.unknown_package = RDKEPackageInfo()  # common package for files with no corresponding ipk
 
-        if not os.path.exists(ipk_dir):
-            os.mkdir(ipk_dir)
+        #paths would be already available if the top layer has populated them.
+        os.makedirs(ipk_dir, exist_ok=True)
 
         # (re)download ipk files from other RDK-E layers.
         # This is necessary to allow rootfs files from these packages to be traced.
