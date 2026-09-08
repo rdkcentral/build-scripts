@@ -413,7 +413,23 @@ def binary_file_size_text(deploy_dir):
             all_text_bits.append("".join(file_text_bits))
     return "\n".join(all_text_bits)
 
-def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", dev_packages_count=None, duplicates_analysis:DuplicatesAnalysis=None):
+def get_compressed_rootfs_size_mb(deploy_dir, image_name, rd):
+    """
+    Locate the compressed rootfs image artefact in DEPLOY_DIR_IMAGE (based on IMAGE_FSTYPES)
+    and return its size in MB, or None if it cannot be found
+    """
+    fstypes = rd.getVar('IMAGE_FSTYPES')
+    if not fstypes:
+        return None
+
+    for fstype in fstypes.split():
+        candidate = os.path.join(deploy_dir, f"{image_name}.rootfs.{fstype}")
+        if os.path.exists(candidate):
+            return round(os.path.getsize(candidate) / (10**6), 2)
+
+    return None
+
+def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", dev_packages_count=None, duplicates_analysis:DuplicatesAnalysis=None, compressed_rootfs_size_mb=None):
     logger.debug("Creating summary file")
     total_file_count = len(files)
     shell_script_count = len([x for x in files if "shell script" in x.filetype])
@@ -430,6 +446,8 @@ def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", de
             statsfile.write(f"Duplicate file size : {round(duplicates_analysis.size_kb)}kB\n")
         statsfile.write(f"Shell script count: {shell_script_count}\n")
         statsfile.write(f"Rootfs size (Expanded, MB): {rootfs_size}\n")
+        if compressed_rootfs_size_mb is not None:
+            statsfile.write(f"Rootfs size (Compressed, MB): {compressed_rootfs_size_mb}\n")
         statsfile.write(f"Files >= 1MB: {files_over_1mb}\n")
         statsfile.write(f"Files < 1MB: {files_under_1mb}\n")
         if type(dev_packages_count) is not None:
@@ -615,13 +633,15 @@ def main():
                 generated_report_files.append(dev_packages_report_path)
                 runtime_profiler.log(f"post dev package report")
                 runtime_profiler.log(f"pre write_summary_txt")
+                compressed_rootfs_size_mb = get_compressed_rootfs_size_mb(deploy_dir, image_name, rd)
                 generated_report_files.append(write_summary_txt(rootfs_files,
                                                     base_filepath + "_summary.txt",
                                                     image_rootfs,
                                                     deploy_dir,
                                                     get_layer_version_info(tinfoil),
                                                     dev_package_count,
-                                                    duplicates_analysis))
+                                                    duplicates_analysis,
+                                                    compressed_rootfs_size_mb))
                 runtime_profiler.log(f"post write_summary_txt")
                 generated_report_files.append(runtime_profiler.output_report(base_filepath + "_script_profiler.csv"))
 
