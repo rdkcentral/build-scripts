@@ -31,6 +31,7 @@ import tarfile
 import shutil
 import re
 import glob
+import fnmatch
 
 from binaryUsage import output_binary_usage_report
 from RDKEAuditUtils import RDKELayerInterface, MinimalPackageInfo, add_poky_scripts_to_sys_path, get_layer_version_info, get_depends_dict, get_required_by_dict, filter_csv_report, get_max_workers, RuntimeProfiler, packages_from_manifest
@@ -290,7 +291,7 @@ def get_image_name_from_version_txt(version_txt):
 
     for line in lines:
         if "imagename" in line:
-            return line.split(':')[1]
+            return line.split(':', 1)[1].strip()
 
     return "Unknown"
 
@@ -413,11 +414,132 @@ def binary_file_size_text(deploy_dir):
             all_text_bits.append("".join(file_text_bits))
     return "\n".join(all_text_bits)
 
-def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", dev_packages_count=None, duplicates_analysis:DuplicatesAnalysis=None):
+def find_image_artifact(search_dir, artifact_pattern, image_name=None, recursive=False):
+    """Find a single image artifact matching a filename glob, newest match wins."""
+    if not search_dir or not os.path.isdir(search_dir):
+        return None
+
+    candidates = []
+    if recursive:
+        visited_dirs = set()
+        for root, dirs, files in os.walk(search_dir, followlinks=True):
+            real_root = os.path.realpath(root)
+            if real_root in visited_dirs:
+                dirs[:] = []
+                continue
+            visited_dirs.add(real_root)
+            dirs[:] = [directory for directory in dirs
+                       if not os.path.islink(os.path.join(root, directory)) or os.path.exists(os.path.join(root, directory))]
+            for filename in fnmatch.filter(files, artifact_pattern):
+                candidates.append(os.path.join(root, filename))
+    else:
+        candidates.extend(glob.glob(os.path.join(search_dir, artifact_pattern)))
+
+    candidates = [path for path in candidates if os.path.isfile(path) and not os.path.islink(path)]
+    if not candidates:
+        return None
+
+    if image_name:
+        image_candidates = [path for path in candidates if image_name in path]
+        if image_candidates:
+            candidates = image_candidates
+
+    return max(candidates, key=os.path.getmtime)
+
+def locate_image_artifact(patterns, search_dirs, image_name=None):
+    """Try each filename pattern against each search directory, in priority order."""
+    for pattern in patterns:
+        for search_dir in search_dirs:
+            found = find_image_artifact(search_dir, pattern, image_name, recursive=True)
+            if found:
+                return found
+    return None
+
+IMAGE_ENTRY_FILENAME_RE = re.compile(r"imageFilename\s*:\s*(\S+)")
+IMAGE_ENTRY_LENGTH_RE = re.compile(r"Component Length\s*\[\s*(0[xX][0-9a-fA-F]+)\s*\]")
+
+def get_size_from_image_entry_logs(search_dirs, artifact_basename):
+    """Recover an artifact size from the image packaging entry table logged at build time.
+
+    The temp_* staging directory holding dmrootfs.bin is often deleted once the final
+    image has been assembled, so the logged entry table is the only remaining source.
+    """
+    log_files = []
+    for search_dir in search_dirs:
+        log_dir = os.path.join(search_dir, "temp")
+        if not os.path.isdir(log_dir):
+            continue
+        for name in os.listdir(log_dir):
+            path = os.path.join(log_dir, name)
+            if name.startswith("log.do_") and os.path.isfile(path):
+                log_files.append(path)
+
+    for log_file in sorted(log_files, key=os.path.getmtime, reverse=True):
+        current_entry = None
+        size_bytes = None
+        try:
+            with open(log_file, "r", errors="replace") as f:
+                for line in f:
+                    filename_match = IMAGE_ENTRY_FILENAME_RE.search(line)
+                    if filename_match:
+                        current_entry = os.path.basename(filename_match.group(1))
+                        continue
+                    length_match = IMAGE_ENTRY_LENGTH_RE.search(line)
+                    if length_match and current_entry == artifact_basename:
+                        size_bytes = int(length_match.group(1), 16)
+        except OSError:
+            continue
+        if size_bytes:
+            logger.info("Recovered %s size from build log %s", artifact_basename, log_file)
+            return size_bytes
+
+    return None
+
+def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", dev_packages_count=None, duplicates_analysis:DuplicatesAnalysis=None, image_name=None, work_dir=None):
     logger.debug("Creating summary file")
     total_file_count = len(files)
     shell_script_count = len([x for x in files if "shell script" in x.filetype])
     rootfs_size = round(sum([x.filesize_kb for x in files]) / 1024, 2)
+
+    # dmrootfs.bin and the final image can live under a temp_* staging directory that is
+    # cleaned up once the build finishes, so search both DEPLOY_DIR_IMAGE and WORKDIR.
+    search_dirs = [directory for directory in (deploy_dir, work_dir) if directory]
+    has_image_name = bool(image_name) and image_name != "Unknown"
+
+    compressed_rootfs = locate_image_artifact(["dmrootfs.bin", "*dmrootfs*.bin"], search_dirs, image_name)
+
+    final_image = None
+    if has_image_name:
+        final_image = locate_image_artifact(
+            [f"{image_name}.bin", f"{image_name}*.bin", f"*{image_name}*.bin"], search_dirs, image_name)
+    if not final_image and deploy_dir:
+        # Last resort: the biggest non-rootfs .bin sitting directly in the deploy directory.
+        deploy_bins = [path for path in glob.glob(os.path.join(deploy_dir, "*.bin"))
+                       if os.path.isfile(path) and not os.path.islink(path) and "dmrootfs" not in os.path.basename(path)]
+        if deploy_bins:
+            final_image = max(deploy_bins, key=os.path.getsize)
+
+    if compressed_rootfs:
+        logger.info("Using compressed rootfs image %s", compressed_rootfs)
+        compressed_rootfs_bytes = os.path.getsize(compressed_rootfs)
+    else:
+        logger.warning("Unable to find compressed rootfs image dmrootfs.bin under %s, falling back to build logs",
+                       " or ".join(search_dirs))
+        compressed_rootfs_bytes = get_size_from_image_entry_logs(search_dirs, "dmrootfs.bin")
+
+    if final_image:
+        logger.info("Using final image %s", final_image)
+        final_image_bytes = os.path.getsize(final_image)
+    else:
+        logger.warning("Unable to find final image for %s under %s", image_name, " or ".join(search_dirs))
+        final_image_bytes = None
+
+    if not compressed_rootfs_bytes:
+        logger.warning("Compressed rootfs size could not be determined")
+
+    compressed_rootfs_size = round(compressed_rootfs_bytes / (2**20), 2) if compressed_rootfs_bytes else None
+    rootfs_contribution = round(compressed_rootfs_bytes / final_image_bytes * 100, 2) \
+        if compressed_rootfs_bytes and final_image_bytes else None
 
     files_over_1mb = len([x.filesize_kb for x in files if x.filesize_kb >= 1024])
     files_under_1mb = len([x.filesize_kb for x in files if x.filesize_kb < 1024])
@@ -430,6 +552,8 @@ def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", de
             statsfile.write(f"Duplicate file size : {round(duplicates_analysis.size_kb)}kB\n")
         statsfile.write(f"Shell script count: {shell_script_count}\n")
         statsfile.write(f"Rootfs size (Expanded, MB): {rootfs_size}\n")
+        statsfile.write(f"Rootfs size (Compressed, MB): {compressed_rootfs_size}\n")
+        statsfile.write(f"Rootfs Contribution Percentage (%): {rootfs_contribution}\n")
         statsfile.write(f"Files >= 1MB: {files_over_1mb}\n")
         statsfile.write(f"Files < 1MB: {files_under_1mb}\n")
         if type(dev_packages_count) is not None:
@@ -621,7 +745,9 @@ def main():
                                                     deploy_dir,
                                                     get_layer_version_info(tinfoil),
                                                     dev_package_count,
-                                                    duplicates_analysis))
+                                                    duplicates_analysis,
+                                                    image_name,
+                                                    work_dir))
                 runtime_profiler.log(f"post write_summary_txt")
                 generated_report_files.append(runtime_profiler.output_report(base_filepath + "_script_profiler.csv"))
 
