@@ -290,7 +290,7 @@ def get_image_name_from_version_txt(version_txt):
 
     for line in lines:
         if "imagename" in line:
-            return line.split(':')[1]
+            return line.split(':', 1)[1].strip()
 
     return "Unknown"
 
@@ -413,11 +413,52 @@ def binary_file_size_text(deploy_dir):
             all_text_bits.append("".join(file_text_bits))
     return "\n".join(all_text_bits)
 
-def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", dev_packages_count=None, duplicates_analysis:DuplicatesAnalysis=None):
+def find_image_artifact(deploy_dir, artifact_name, image_name=None, recursive=False):
+    candidates = []
+    if recursive:
+        visited_dirs = set()
+        for root, dirs, files in os.walk(deploy_dir, followlinks=True):
+            real_root = os.path.realpath(root)
+            if real_root in visited_dirs:
+                dirs[:] = []
+                continue
+            visited_dirs.add(real_root)
+            dirs[:] = [directory for directory in dirs
+                       if not os.path.islink(os.path.join(root, directory)) or os.path.exists(os.path.join(root, directory))]
+            if artifact_name in files:
+                candidates.append(os.path.join(root, artifact_name))
+    else:
+        artifact_path = os.path.join(deploy_dir, artifact_name)
+        if os.path.isfile(artifact_path):
+            candidates.append(artifact_path)
+
+    if image_name:
+        image_candidates = [path for path in candidates if image_name in path]
+        if image_candidates:
+            candidates = image_candidates
+
+    return max(candidates, key=os.path.getmtime) if candidates else None
+
+def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", dev_packages_count=None, duplicates_analysis:DuplicatesAnalysis=None, image_name=None):
     logger.debug("Creating summary file")
     total_file_count = len(files)
     shell_script_count = len([x for x in files if "shell script" in x.filetype])
     rootfs_size = round(sum([x.filesize_kb for x in files]) / 1024, 2)
+
+    compressed_rootfs = find_image_artifact(deploy_dir, "dmrootfs.bin", image_name, recursive=True)
+    final_image = find_image_artifact(deploy_dir, f"{image_name}.bin", image_name, recursive=True) if image_name else None
+    compressed_rootfs_size = round(os.path.getsize(compressed_rootfs) / (2**20), 2) if compressed_rootfs else None
+    final_image_size = os.path.getsize(final_image) if final_image else None
+    rootfs_contribution = round(os.path.getsize(compressed_rootfs) / final_image_size * 100, 2) if compressed_rootfs and final_image_size else None
+
+    if compressed_rootfs:
+        logger.info("Using compressed rootfs image %s", compressed_rootfs)
+    else:
+        logger.warning("Unable to find compressed rootfs image dmrootfs.bin under %s", deploy_dir)
+    if final_image:
+        logger.info("Using final image %s", final_image)
+    else:
+        logger.warning("Unable to find final image %s.bin under %s", image_name, deploy_dir)
 
     files_over_1mb = len([x.filesize_kb for x in files if x.filesize_kb >= 1024])
     files_under_1mb = len([x.filesize_kb for x in files if x.filesize_kb < 1024])
@@ -430,6 +471,8 @@ def write_summary_txt(files, filename, rootfs_dir, deploy_dir, layer_info="", de
             statsfile.write(f"Duplicate file size : {round(duplicates_analysis.size_kb)}kB\n")
         statsfile.write(f"Shell script count: {shell_script_count}\n")
         statsfile.write(f"Rootfs size (Expanded, MB): {rootfs_size}\n")
+        statsfile.write(f"Rootfs size (Compressed, MB): {compressed_rootfs_size if compressed_rootfs_size is not None else 'N/A'}\n")
+        statsfile.write(f"Rootfs Contribution (%) Percentage: {rootfs_contribution if rootfs_contribution is not None else 'N/A'}\n")
         statsfile.write(f"Files >= 1MB: {files_over_1mb}\n")
         statsfile.write(f"Files < 1MB: {files_under_1mb}\n")
         if type(dev_packages_count) is not None:
@@ -621,7 +664,8 @@ def main():
                                                     deploy_dir,
                                                     get_layer_version_info(tinfoil),
                                                     dev_package_count,
-                                                    duplicates_analysis))
+                                                    duplicates_analysis,
+                                                    image_name))
                 runtime_profiler.log(f"post write_summary_txt")
                 generated_report_files.append(runtime_profiler.output_report(base_filepath + "_script_profiler.csv"))
 
