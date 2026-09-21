@@ -152,8 +152,39 @@ if [ "${QT5_1_ENABLED}" = "true" ]; then
         return 1
     fi
 
+    echo "Ensuring pinned meta-qt5 revision is available: ${qt5_commit}"
+
+    if ! git -C "${meta_qt5_dir}" cat-file -e "${qt5_commit}^{commit}" 2>/dev/null; then
+        echo "Pinned revision is not available locally; fetching it from origin"
+
+        if [ "$(git -C "${meta_qt5_dir}" rev-parse --is-shallow-repository)" = "true" ]; then
+            git -C "${meta_qt5_dir}" fetch \
+                --no-tags \
+                --unshallow \
+                origin || {
+                    echo "ERROR: unable to fetch complete meta-qt5 history"
+                    return 1
+                }
+        else
+            git -C "${meta_qt5_dir}" fetch \
+                --no-tags \
+                origin \
+                "${qt5_commit}" || {
+                    echo "ERROR: unable to fetch meta-qt5 revision ${qt5_commit}"
+                    return 1
+                }
+        fi
+    fi
+
+    if ! git -C "${meta_qt5_dir}" cat-file -e "${qt5_commit}^{commit}" 2>/dev/null; then
+        echo "ERROR: meta-qt5 revision is still unavailable: ${qt5_commit}"
+        return 1
+    fi
+
     echo "Checking out pre-Qt-5.15.7 meta-qt5 revision: ${qt5_commit}"
-    git -C "${meta_qt5_dir}" checkout --detach --force "${qt5_commit}" || return 1
+    git -C "${meta_qt5_dir}" checkout \
+        --detach \
+        "${qt5_commit}" || return 1
 
     echo "Checking meta-qt5 compatibility patch"
     git -C "${meta_qt5_dir}" apply \
