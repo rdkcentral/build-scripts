@@ -56,3 +56,16 @@ index abeb15f..bf53e4b 100644
  DEPENDS += "qtbase qtdeclarative wayland wayland-native qtwayland-native ${XKB_DEPENDS}"
  
  QT_WAYLAND_CONFIG ?= "wayland-compositor"
+diff --git a/recipes-qt/qt5/qtwebkit.inc b/recipes-qt/qt5/qtwebkit.inc
+index 76db595..ebfcaf2 100644
+--- a/recipes-qt/qt5/qtwebkit.inc
++++ b/recipes-qt/qt5/qtwebkit.inc
+@@ -15,7 +15,7 @@ PACKAGECONFIG[qtmultimedia] = "OE_QTMULTIMEDIA_ENABLED,,qtmultimedia"
+ PACKAGECONFIG[qtsensors] = "OE_QTSENSORS_ENABLED,,qtsensors"
+ PACKAGECONFIG[libwebp] = "OE_LIBWEBP_ENABLED,,libwebp"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     export QMAKE_CACHE_EVAL="CONFIG+=${EXTRA_OECONF}"
+     # disable gstreamer-1.0 test if it isn't enabled by PACKAGECONFIG
+     sed -e 's/\s\(packagesExist(".*\<gstreamer-1.0\>.*")\)/ OE_GSTREAMER_ENABLED:\1/' -i ${S}/Tools/qmake/mkspecs/features/features.prf
