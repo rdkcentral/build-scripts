@@ -1,0 +1,58 @@
+diff --git a/classes/qmake5.bbclass b/classes/qmake5.bbclass
+index b056ea7..c857ceb 100644
+--- a/classes/qmake5.bbclass
++++ b/classes/qmake5.bbclass
+@@ -4,7 +4,7 @@
+ inherit qmake5_base
+ 
+ QT5TOOLSDEPENDS ?= "qtbase-native"
+-DEPENDS_prepend = "${QT5TOOLSDEPENDS} "
++DEPENDS:prepend = "${QT5TOOLSDEPENDS} "
+ 
+ do_configure() {
+     qmake5_base_do_configure
+diff --git a/conf/layer.conf b/conf/layer.conf
+index 43803fb..712e929 100644
+--- a/conf/layer.conf
++++ b/conf/layer.conf
+@@ -23,7 +23,7 @@ BBFILE_PATTERN_qt5-layer := "^${LAYERDIR}/"
+ 
+ BBFILE_PRIORITY_qt5-layer = "7"
+ 
+-LAYERSERIES_COMPAT_qt5-layer = "zeus dunfell"
++LAYERSERIES_COMPAT_qt5-layer = "zeus dunfell kirkstone"
+ 
+ LICENSE_PATH += "${LAYERDIR}/licenses"
+ 
+diff --git a/recipes-qt/qt5/qtbase_5.1.1.bb b/recipes-qt/qt5/qtbase_5.1.1.bb
+index 9df383e..7b548f1 100644
+--- a/recipes-qt/qt5/qtbase_5.1.1.bb
++++ b/recipes-qt/qt5/qtbase_5.1.1.bb
+@@ -15,12 +15,9 @@ require ${PN}-${PV}.inc
+ 
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ 
+-inherit install-layer-dependent-ipk
+-LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
++DEPENDS:remove = "virtual/egl virtual/libgles2 directfb"
+ 
+-DEPENDS_remove = "virtual/egl virtual/libgles2 directfb"
+-
+-do_configure_prepend() {
++do_configure:prepend() {
+ 	rm -rf ${S}/../../components ${S}/../../qtbrowser \
+                ${S}/../../webtests ${S}/../qtwebengine/ \
+                ${S}/../qtimageformats ${S}/../qtwebkit-examples/ \
+diff --git a/recipes-qt/qt5/qtwayland.inc b/recipes-qt/qt5/qtwayland.inc
+index abeb15f..bf53e4b 100644
+--- a/recipes-qt/qt5/qtwayland.inc
++++ b/recipes-qt/qt5/qtwayland.inc
+@@ -4,7 +4,7 @@ require qt5.inc
+ # explicitly, because it's native wayland-scanner we're looking for
+ # libxkbcommon isn't mandatory make it easier to remove by .bbappend
+ # (e.g. for building qtwayland with danny which doesn't have libxkbcommon in oe-core).
+-XKB_DEPENDS = "libxkbcommon xproto"
++XKB_DEPENDS = "libxkbcommon xorgproto"
+ DEPENDS += "qtbase qtdeclarative wayland wayland-native qtwayland-native ${XKB_DEPENDS}"
+ 
+ QT_WAYLAND_CONFIG ?= "wayland-compositor"

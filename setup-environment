@@ -127,6 +127,54 @@ then
         mv ${_PWD_PREV}/../manifest_vars.conf ${_BUILDDIR}/conf/manifest_vars.conf
 fi
 
+QT5_1_ENABLED="${QT5_1_ENABLED:-true}"
+
+if [ "${QT5_1_ENABLED}" = "true" ]; then
+    echo "====================================="
+    echo "QT5.1 mode enabled"
+    echo "====================================="
+
+    # _PWD_PREV is the absolute path to <workspace>/scripts.
+    workspace_dir="$(cd "${_PWD_PREV}/.." && pwd)"
+
+    meta_qt5_dir="${workspace_dir}/rdke/middleware/cspc/meta-qt5"
+    qt5_patch="${_PWD_PREV}/patches/meta_qt5/0003-meta-qt5-compatibility.patch"
+    qt5_commit="fd510d2e0841e5cb98a06439f9e8e29a7ce241bd"
+
+    if [ ! -d "${meta_qt5_dir}/.git" ]; then
+        echo "ERROR: meta-qt5 repository not found: ${meta_qt5_dir}"
+        return 1
+    fi
+
+    if [ ! -s "${qt5_patch}" ]; then
+        echo "ERROR: meta-qt5 compatibility patch is missing or empty:"
+        echo "       ${qt5_patch}"
+        return 1
+    fi
+
+    echo "Checking out pre-Qt-5.15.7 meta-qt5 revision: ${qt5_commit}"
+    git -C "${meta_qt5_dir}" checkout --detach --force "${qt5_commit}" || return 1
+
+    echo "Checking meta-qt5 compatibility patch"
+    git -C "${meta_qt5_dir}" apply \
+        --check \
+        --whitespace=error \
+        -p1 \
+        "${qt5_patch}" || {
+            echo "ERROR: meta-qt5 compatibility patch cannot be applied"
+            return 1
+        }
+
+    echo "Applying meta-qt5 compatibility patch"
+    git -C "${meta_qt5_dir}" apply \
+        --whitespace=error \
+        -p1 \
+        "${qt5_patch}" || return 1
+
+    echo "meta-qt5 patch applied successfully"
+    echo "meta-qt5 baseline HEAD: $(git -C "${meta_qt5_dir}" rev-parse HEAD)"
+fi
+
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
 TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/template/ source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
 
