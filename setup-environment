@@ -155,20 +155,20 @@ if [ "${QT5_1_ENABLED}" = "true" ]; then
     echo "Ensuring pinned meta-qt5 revision is available: ${qt5_commit}"
 
     if ! git -C "${meta_qt5_dir}" cat-file -e "${qt5_commit}^{commit}" 2>/dev/null; then
-        echo "Pinned revision is not available locally; fetching it from origin"
+        echo "Pinned revision is not available locally; fetching it from rdke"
 
         if [ "$(git -C "${meta_qt5_dir}" rev-parse --is-shallow-repository)" = "true" ]; then
             git -C "${meta_qt5_dir}" fetch \
                 --no-tags \
                 --unshallow \
-                origin || {
+                rdke || {
                     echo "ERROR: unable to fetch complete meta-qt5 history"
                     return 1
                 }
         else
             git -C "${meta_qt5_dir}" fetch \
                 --no-tags \
-                origin \
+                rdke \
                 "${qt5_commit}" || {
                     echo "ERROR: unable to fetch meta-qt5 revision ${qt5_commit}"
                     return 1
