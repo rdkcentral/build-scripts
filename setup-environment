@@ -127,7 +127,7 @@ then
         mv ${_PWD_PREV}/../manifest_vars.conf ${_BUILDDIR}/conf/manifest_vars.conf
 fi
 
-QT5_1_ENABLED="${QT5_1_ENABLED:-true}"
+QT5_1_ENABLED="${QT5_1_ENABLED:-false}"
 
 if [ "${QT5_1_ENABLED}" = "true" ]; then
     echo "====================================="
