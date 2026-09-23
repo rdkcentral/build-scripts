@@ -315,7 +315,7 @@ index 9df383e..7b548f1 100644
  
 -inherit install-layer-dependent-ipk
 -LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
-+DEPENDS:remove = "virtual/egl virtual/libgles2 directfb"
++DEPENDS:remove = "directfb"
  
 -DEPENDS_remove = "virtual/egl virtual/libgles2 directfb"
 -
