@@ -209,6 +209,17 @@ fi
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
 TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/template/ source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
 
+if [ "${QT5_1_ENABLED}" = "true" ]; then
+    grep -q '^PACKAGECONFIG_GL:pn-qtbase = "gles2"$' conf/local.conf || \
+        echo 'PACKAGECONFIG_GL:pn-qtbase = "gles2"' >> conf/local.conf
+
+    grep -q '^PACKAGECONFIG:remove:pn-qtbase = "gl"$' conf/local.conf || \
+        echo 'PACKAGECONFIG:remove:pn-qtbase = "gl"' >> conf/local.conf
+
+    grep -q '^PACKAGECONFIG:append:pn-qtbase = " gles2"$' conf/local.conf || \
+        echo 'PACKAGECONFIG:append:pn-qtbase = " gles2"' >> conf/local.conf
+fi
+
 if [ "$_CONFIGS_FOUND" ]; then
     echo -e "\nConfig files already exist in folder ${_BUILDDIR}/conf/, they were not modified."
     unset -f usage
