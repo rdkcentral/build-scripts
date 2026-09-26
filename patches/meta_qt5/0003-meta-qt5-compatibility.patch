@@ -1,0 +1,454 @@
+diff --git a/classes/populate_sdk_qt5.bbclass b/classes/populate_sdk_qt5.bbclass
+index 7b31bbb..cd34e29 100644
+--- a/classes/populate_sdk_qt5.bbclass
++++ b/classes/populate_sdk_qt5.bbclass
+@@ -6,7 +6,7 @@ TOOLCHAIN_TARGET_TASK += "packagegroup-qt5-toolchain-target"
+ # This allow reuse of Qt paths
+ inherit qmake5_paths
+ 
+-toolchain_create_sdk_env_script_append () {
++toolchain_create_sdk_env_script:append() {
+     echo 'export PATH=${SDKPATHNATIVE}${OE_QMAKE_PATH_HOST_BINS}:$PATH' >> $script
+     echo 'export OE_QMAKE_CFLAGS="$CFLAGS"' >> $script
+     echo 'export OE_QMAKE_CXXFLAGS="$CXXFLAGS"' >> $script
+diff --git a/classes/qmake5.bbclass b/classes/qmake5.bbclass
+index b056ea7..c857ceb 100644
+--- a/classes/qmake5.bbclass
++++ b/classes/qmake5.bbclass
+@@ -4,7 +4,7 @@
+ inherit qmake5_base
+ 
+ QT5TOOLSDEPENDS ?= "qtbase-native"
+-DEPENDS_prepend = "${QT5TOOLSDEPENDS} "
++DEPENDS:prepend = "${QT5TOOLSDEPENDS} "
+ 
+ do_configure() {
+     qmake5_base_do_configure
+diff --git a/conf/layer.conf b/conf/layer.conf
+index 43803fb..712e929 100644
+--- a/conf/layer.conf
++++ b/conf/layer.conf
+@@ -23,7 +23,7 @@ BBFILE_PATTERN_qt5-layer := "^${LAYERDIR}/"
+ 
+ BBFILE_PRIORITY_qt5-layer = "7"
+ 
+-LAYERSERIES_COMPAT_qt5-layer = "zeus dunfell"
++LAYERSERIES_COMPAT_qt5-layer = "zeus dunfell kirkstone"
+ 
+ LICENSE_PATH += "${LAYERDIR}/licenses"
+ 
+diff --git a/recipes-qt/maliit/maliit-framework-qt5_git.bb b/recipes-qt/maliit/maliit-framework-qt5_git.bb
+index 633bf6e..4c45f38 100644
+--- a/recipes-qt/maliit/maliit-framework-qt5_git.bb
++++ b/recipes-qt/maliit/maliit-framework-qt5_git.bb
+@@ -60,7 +60,7 @@ EXTRA_QMAKEVARS_PRE = "\
+ 
+ EXTRA_OEMAKE += "INSTALL_ROOT=${D}"
+ 
+-do_install_append() {
++do_install:append() {
+     #Fix absolute paths
+     sed -i -e "s|/usr|${STAGING_DIR_TARGET}${prefix}|" ${D}/${libdir}/${QT_DIR_NAME}/mkspecs/features/maliit-framework.prf
+     sed -i -e "s|/usr|${STAGING_DIR_TARGET}${prefix}|" ${D}/${libdir}/${QT_DIR_NAME}/mkspecs/features/maliit-plugins.prf
+diff --git a/recipes-qt/qsiv/qsiv_1.1.bb b/recipes-qt/qsiv/qsiv_1.1.bb
+index bb2efa6..d772939 100644
+--- a/recipes-qt/qsiv/qsiv_1.1.bb
++++ b/recipes-qt/qsiv/qsiv_1.1.bb
+@@ -13,7 +13,7 @@ inherit qmake5
+ 
+ EXTRA_QMAKEVARS_PRE += "target.path=${libdir}/${P}"
+ 
+-do_install_append() {
++do_install:append() {
+     install -d ${D}${bindir}
+     echo "#!/bin/sh" > ${D}${bindir}/qsiv
+     echo "export QML_IMPORT_PATH=${libdir}/${P}/qml/qsiv" >> ${D}${bindir}/qsiv
+diff --git a/recipes-qt/qt5/nativesdk-qtbase.inc b/recipes-qt/qt5/nativesdk-qtbase.inc
+index 46697a6..b42bf8c 100644
+--- a/recipes-qt/qt5/nativesdk-qtbase.inc
++++ b/recipes-qt/qt5/nativesdk-qtbase.inc
+@@ -108,7 +108,7 @@ Sysroot =
+ EOF
+ }
+ 
+-do_generate_qt_config_file_append() {
++do_generate_qt_config_file:append() {
+     cat >> ${QT_CONF_PATH} <<EOF
+ 
+ [EffectivePaths]
+diff --git a/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+index 5b08d5c..998eab7 100644
+--- a/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
++++ b/recipes-qt/qt5/nativesdk-qtbase_5.1.1.inc
+@@ -110,7 +110,7 @@ EOF
+ # Even though moc  and rcc is in this path.
+ #HostBinaries = ${OE_QMAKE_PATH_EXTERNAL_HOST_BINS}
+ 
+-do_generate_qt_config_file_append() {
++do_generate_qt_config_file:append() {
+     cat >> ${QT_CONF_PATH} <<EOF
+ 
+ [EffectivePaths]
+diff --git a/recipes-qt/qt5/qt3d_git.bb b/recipes-qt/qt5/qt3d_git.bb
+index aaa9c04..4a227e2 100644
+--- a/recipes-qt/qt5/qt3d_git.bb
++++ b/recipes-qt/qt5/qt3d_git.bb
+@@ -6,7 +6,7 @@ QT_MODULE_BRANCH = "master"
+ # last tag before this SRCREV is 5.0.0-beta1, but version says 5.3.0 already
+ SRCREV = "d3338a9f7fcac109d7bc7f600d5974ff333782ad"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     # Temporary hack to get qt3d build for Qt 5.1.0
+     if ! grep -q MODULE_VERSION ${S}/.qmake.conf; then
+         echo "MODULE_VERSION = 5.3.0" >> ${S}/.qmake.conf
+diff --git a/recipes-qt/qt5/qt5-native.inc b/recipes-qt/qt5/qt5-native.inc
+index 8535028..83fc7b2 100644
+--- a/recipes-qt/qt5/qt5-native.inc
++++ b/recipes-qt/qt5/qt5-native.inc
+@@ -13,7 +13,7 @@ OE_QMAKE_PATH_TESTS = "${OE_QMAKE_PATH_QT_TESTS}"
+ 
+ # Regenerate header files when they are included in source tarball
+ # Otherwise cmake files don't set PRIVATE_HEADERS correctly
+-do_configure_prepend() {
++do_configure:prepend() {
+     rm -rf ${S}/include
+     mkdir -p ${S}/.git || true
+ }
+diff --git a/recipes-qt/qt5/qt5.inc b/recipes-qt/qt5/qt5.inc
+index 96016c2..9657626 100644
+--- a/recipes-qt/qt5/qt5.inc
++++ b/recipes-qt/qt5/qt5.inc
+@@ -33,14 +33,14 @@ python __anonymous() {
+ 
+ # Regenerate header files when they are included in source tarball
+ # Otherwise cmake files don't set PRIVATE_HEADERS correctly
+-do_configure_prepend() {
++do_configure:prepend() {
+     rm -rf ${S}/include
+     mkdir -p ${S}/.git || true
+ }
+ 
+ 
+ PACKAGES =. "${PN}-qmlplugins-dbg ${PN}-tools-dbg ${PN}-plugins-dbg ${PN}-qmlplugins ${PN}-tools ${PN}-plugins ${PN}-mkspecs ${PN}-examples-dev ${PN}-examples-staticdev ${PN}-examples-dbg ${PN}-examples "
+-PACKAGES_remove_dunfell = "${PN}-qmlplugins-dbg ${PN}-tools-dbg ${PN}-plugins-dbg ${PN}-examples-dbg"
++PACKAGES:remove:dunfell = "${PN}-qmlplugins-dbg ${PN}-tools-dbg ${PN}-plugins-dbg ${PN}-examples-dbg"
+ 
+ # extra -dbg packages
+ FILES_${PN}-qmlplugins-dbg = " \
+@@ -164,4 +164,4 @@ FILES_${PN}-examples-staticdev = " \
+     ${OE_QMAKE_PATH_EXAMPLES}/*/*/*/*/*/*/*/*.a \
+ "
+ 
+-PATH_prepend = "${STAGING_DIR_NATIVE}${OE_QMAKE_PATH_QT_BINS}:"
++PATH:prepend = "${STAGING_DIR_NATIVE}${OE_QMAKE_PATH_QT_BINS}:"
+diff --git a/recipes-qt/qt5/qtbase-5.1.1.inc b/recipes-qt/qt5/qtbase-5.1.1.inc
+index 5054b23..cfa2cea 100644
+--- a/recipes-qt/qt5/qtbase-5.1.1.inc
++++ b/recipes-qt/qt5/qtbase-5.1.1.inc
+@@ -35,8 +35,8 @@ SRC_URI += " \
+     file://0001-Backport-QObject-Not-to-Destroy-SlotObject-inside-lock.patch \
+     file://0001-Backport-QDbus_Fix_of_Losing_Valid_DBus_Obj_After_UnregisterObject.patch \
+ "
+-SRC_URI_append_dunfell = " file://gcc9-foreach.patch;striplevel=3"
+-SRC_URI_append_dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', ' file://0026_patches_for_openssl_111x.patch', ' file://0026_patches_for_openssl_11.patch', d)}"
++SRC_URI:append:dunfell = " file://gcc9-foreach.patch;striplevel=3"
++SRC_URI:append:dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', ' file://0026_patches_for_openssl_111x.patch', ' file://0026_patches_for_openssl_11.patch', d)}"
+ 
+ DEPENDS += "qtbase-native"
+ 
+@@ -149,13 +149,13 @@ QT_CONFIG_FLAGS += " \
+ "
+ 
+ #Enforce to use openssl-1.0 for dunfell build
+-DEPENDS_append_dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', ' openssl', ' openssl-1.0.2o', d)}"
+-DEPENDS_remove_dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', 'openssl', d)}"
+-CXXFLAGS_append_dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', ' -I${STAGING_INCDIR}/openssl-1.0.2o', d)}"
++DEPENDS:append:dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', ' openssl', ' openssl-1.0.2o', d)}"
++DEPENDS:remove:dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', 'openssl', d)}"
++CXXFLAGS:append:dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', ' -I${STAGING_INCDIR}/openssl-1.0.2o', d)}"
+ export OPENSSL_LIBS = "${@bb.utils.contains('DISTRO_FEATURES', 'dunfell', bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', '-L${STAGING_LIBDIR}/openssl-1.0.2o -lcrypto-1.0.2o -lssl-1.0.2o', d), '', d)}"
+-EXTRA_OECONF_append_dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', ' -openssl-linked', d)}"
++EXTRA_OECONF:append:dunfell = "${@bb.utils.contains('DISTRO_FEATURES', 'ssl-1.1.1', '', ' -openssl-linked', d)}"
+ 
+-do_generate_qt_config_file_append() {
++do_generate_qt_config_file:append() {
+     cat >> ${QT_CONF_PATH} <<EOF
+ 
+ [EffectivePaths]
+@@ -219,7 +219,7 @@ do_configure() {
+     qmake5_base_do_configure
+ }
+ 
+-do_compile_append() {
++do_compile:append() {
+     # Build qmake for the target arch
+     # Disable for now, because doesn't work well with separate ${B}
+     # cp -ra ${S}/qmake ${B}
+@@ -231,7 +231,7 @@ do_compile_append() {
+     # cd ${B}
+ }
+ 
+-do_install_append() {
++do_install:append() {
+     ### Fix up the binaries to the right location
+     ### TODO: FIX
+     # qemu built on host breaks do_package, remove it here (will be replaces with right qemu when do_compile is fixed
+diff --git a/recipes-qt/qt5/qtbase-native-5.1.1.inc b/recipes-qt/qt5/qtbase-native-5.1.1.inc
+index 94f54f6..258fe28 100644
+--- a/recipes-qt/qt5/qtbase-native-5.1.1.inc
++++ b/recipes-qt/qt5/qtbase-native-5.1.1.inc
+@@ -91,7 +91,7 @@ export OE_QMAKE_LDFLAGS
+ export OE_QMAKE_AR
+ export OE_QMAKE_STRIP
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     (echo o; echo yes) | ${S}/configure ${EXTRA_OECONF} || die "Configuring qt failed. EXTRA_OECONF was ${EXTRA_OECONF}"
+     bin/qmake ${OE_QMAKE_DEBUG_OUTPUT} ${S} -o Makefile || die "Configuring qt with qmake failed. EXTRA_OECONF was ${EXTRA_OECONF}"
+ }
+diff --git a/recipes-qt/qt5/qtbase-native.inc b/recipes-qt/qt5/qtbase-native.inc
+index 860bc29..53a7d8a 100644
+--- a/recipes-qt/qt5/qtbase-native.inc
++++ b/recipes-qt/qt5/qtbase-native.inc
+@@ -82,7 +82,7 @@ export OE_QMAKE_LDFLAGS
+ export OE_QMAKE_AR
+ export OE_QMAKE_STRIP
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     (echo o; echo yes) | ${S}/configure ${EXTRA_OECONF} || die "Configuring qt failed. EXTRA_OECONF was ${EXTRA_OECONF}"
+     bin/qmake ${OE_QMAKE_DEBUG_OUTPUT} ${S} -o Makefile || die "Configuring qt with qmake failed. EXTRA_OECONF was ${EXTRA_OECONF}"
+ }
+diff --git a/recipes-qt/qt5/qtbase-native_5.1.1.bb b/recipes-qt/qt5/qtbase-native_5.1.1.bb
+index 3807765..5c0490c 100644
+--- a/recipes-qt/qt5/qtbase-native_5.1.1.bb
++++ b/recipes-qt/qt5/qtbase-native_5.1.1.bb
+@@ -6,12 +6,12 @@ LIC_FILES_CHKSUM = "file://LICENSE.LGPL;md5=4193e7f1d47a858f6b7c0f1ee66161de \
+ 
+ SRCREV = "${AUTOREV}"
+ SRC_URI += "git://${RDK_GIT}/rdk/components/opensource/qt5_1/generic;protocol=${RDK_GIT_PROTOCOL};branch=${RDK_GIT_BRANCH};lfs=0"
+-SRC_URI_append = " file://0001-replace-foreach-with-C-11-range-for-loops.patch;striplevel=3 "
++SRC_URI:append = " file://0001-replace-foreach-with-C-11-range-for-loops.patch;striplevel=3 "
+ S = "${WORKDIR}/git/source/qtbase"
+ 
+ require ${PN}-${PV}.inc
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+         rm -rf ${S}/../../components ${S}/../../qtbrowser \
+                ${S}/../../webtests ${S}/../qtwebengine/ \
+                ${S}/../qtimageformats ${S}/../qtwebkit-examples/ \
+@@ -19,7 +19,7 @@ do_configure_prepend() {
+                ${S}/../qt.pro ${S}/../configure
+ }
+ 
+-do_install_append() {
++do_install:append() {
+     # for modules which are still using syncqt and call qtPrepareTool(QMAKE_SYNCQT, syncqt)
+     # e.g. qt3d, qtwayland
+     ln -sf syncqt.pl ${D}${OE_QMAKE_PATH_QT_BINS}/syncqt
+diff --git a/recipes-qt/qt5/qtbase-native_5.2.1.bb b/recipes-qt/qt5/qtbase-native_5.2.1.bb
+index 54adc48..4672852 100644
+--- a/recipes-qt/qt5/qtbase-native_5.2.1.bb
++++ b/recipes-qt/qt5/qtbase-native_5.2.1.bb
+@@ -1,7 +1,7 @@
+ require qt5-${PV}.inc
+ require ${PN}.inc
+ 
+-do_install_append() {
++do_install:append() {
+     # for modules which are still using syncqt and call qtPrepareTool(QMAKE_SYNCQT, syncqt)
+     # e.g. qt3d, qtwayland
+     ln -sf syncqt.pl ${D}${OE_QMAKE_PATH_QT_BINS}/syncqt
+diff --git a/recipes-qt/qt5/qtbase-native_git.bb b/recipes-qt/qt5/qtbase-native_git.bb
+index 6f11bf3..68c2988 100644
+--- a/recipes-qt/qt5/qtbase-native_git.bb
++++ b/recipes-qt/qt5/qtbase-native_git.bb
+@@ -1,7 +1,7 @@
+ require qt5-git.inc
+ require ${PN}.inc
+ 
+-do_install_append() {
++do_install:append() {
+     # for modules which are still using syncqt and call qtPrepareTool(QMAKE_SYNCQT, syncqt)
+     # e.g. qt3d, qtwayland
+     ln -sf syncqt.pl ${D}${OE_QMAKE_PATH_QT_BINS}/syncqt
+diff --git a/recipes-qt/qt5/qtbase.inc b/recipes-qt/qt5/qtbase.inc
+index e609da2..72d2067 100644
+--- a/recipes-qt/qt5/qtbase.inc
++++ b/recipes-qt/qt5/qtbase.inc
+@@ -135,7 +135,7 @@ QT_CONFIG_FLAGS += " \
+     ${EXTRA_OECONF} \
+ "
+ 
+-do_generate_qt_config_file_append() {
++do_generate_qt_config_file:append() {
+     cat >> ${QT_CONF_PATH} <<EOF
+ 
+ [EffectivePaths]
+@@ -199,7 +199,7 @@ do_configure() {
+     qmake5_base_do_configure
+ }
+ 
+-do_compile_append() {
++do_compile:append() {
+     # Build qmake for the target arch
+     # Disable for now, because doesn't work well with separate ${B}
+     # cp -ra ${S}/qmake ${B}
+@@ -211,7 +211,7 @@ do_compile_append() {
+     # cd ${B}
+ }
+ 
+-do_install_append() {
++do_install:append() {
+     ### Fix up the binaries to the right location
+     ### TODO: FIX
+     # qemu built on host breaks do_package, remove it here (will be replaces with right qemu when do_compile is fixed
+diff --git a/recipes-qt/qt5/qtbase_5.1.1.bb b/recipes-qt/qt5/qtbase_5.1.1.bb
+index 9df383e..f70b215 100644
+--- a/recipes-qt/qt5/qtbase_5.1.1.bb
++++ b/recipes-qt/qt5/qtbase_5.1.1.bb
+@@ -15,12 +15,9 @@ require ${PN}-${PV}.inc
+ 
+ PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
+ 
+-inherit install-layer-dependent-ipk
+-LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
++DEPENDS:remove = "directfb"
+ 
+-DEPENDS_remove = "virtual/egl virtual/libgles2 directfb"
+-
+-do_configure_prepend() {
++do_configure:prepend() {
+ 	rm -rf ${S}/../../components ${S}/../../qtbrowser \
+                ${S}/../../webtests ${S}/../qtwebengine/ \
+                ${S}/../qtimageformats ${S}/../qtwebkit-examples/ \
+diff --git a/recipes-qt/qt5/qtconnectivity.inc b/recipes-qt/qt5/qtconnectivity.inc
+index a92290f..d8927ac 100644
+--- a/recipes-qt/qt5/qtconnectivity.inc
++++ b/recipes-qt/qt5/qtconnectivity.inc
+@@ -5,7 +5,7 @@ DEPENDS += "qtbase qtdeclarative"
+ PACKAGECONFIG ??= ""
+ PACKAGECONFIG[bluez4] = ",,bluez4"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     # disable bluez test if it isn't enabled by PACKAGECONFIG
+     sed -i 's/^qtCompileTest(bluez)/OE_BLUEZ_ENABLED:qtCompileTest(bluez)/g' ${S}/qtconnectivity.pro
+ }
+diff --git a/recipes-qt/qt5/qtdeclarative.inc b/recipes-qt/qt5/qtdeclarative.inc
+index e2b1c60..c117463 100644
+--- a/recipes-qt/qt5/qtdeclarative.inc
++++ b/recipes-qt/qt5/qtdeclarative.inc
+@@ -9,7 +9,7 @@ DEPENDS += "qtbase"
+ PACKAGECONFIG ??= "qtxmlpatterns"
+ PACKAGECONFIG[qtxmlpatterns] = ",,qtxmlpatterns"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     # disable qtxmlpatterns test if it isn't enabled by PACKAGECONFIG
+     sed -e 's/^\(qtHaveModule(xmlpatterns)\)/OE_QTXMLPATTERNS_ENABLED:\1/' -i ${S}/src/imports/imports.pro
+     sed -e 's/^\(!qtHaveModule(xmlpatterns)\)/!OE_QTXMLPATTERNS_ENABLED|\1/' -i ${S}/tests/auto/quick/quick.pro
+diff --git a/recipes-qt/qt5/qtlocation.inc b/recipes-qt/qt5/qtlocation.inc
+index ea8dcfe..5f28a82 100644
+--- a/recipes-qt/qt5/qtlocation.inc
++++ b/recipes-qt/qt5/qtlocation.inc
+@@ -8,7 +8,7 @@ PACKAGECONFIG ??= ""
+ PACKAGECONFIG[geoclue] = "OE_GEOCLUE_ENABLED,,gconf geoclue"
+ PACKAGECONFIG[gypsy] = "OE_GYPSY_ENABLED,,gconf gypsy"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     # disable geoclue tests if it isn't enabled by PACKAGECONFIG
+     sed -i -e 's/^\(qtCompileTest(geoclue)\)/OE_GEOCLUE_ENABLED:\1/' ${S}/qtlocation.pro
+     sed -i -e 's/^\(qtCompileTest(geoclue-satellite)\)/OE_GEOCLUE_ENABLED:\1/' ${S}/qtlocation.pro
+diff --git a/recipes-qt/qt5/qtmultimedia.inc b/recipes-qt/qt5/qtmultimedia.inc
+index c3b50d2..a570c72 100644
+--- a/recipes-qt/qt5/qtmultimedia.inc
++++ b/recipes-qt/qt5/qtmultimedia.inc
+@@ -6,7 +6,7 @@ PACKAGECONFIG ??= ""
+ PACKAGECONFIG[openal] = ",,openal-soft"
+ PACKAGECONFIG[gstreamer010] = ",,gstreamer gst-plugins-base"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     # disable openal test if it isn't enabled by PACKAGECONFIG
+     sed -i 's/^qtCompileTest(openal)/OE_OPENAL_ENABLED:qtCompileTest(openal)/g' ${S}/qtmultimedia.pro
+     # disable gstreamer-0.10 test if it isn't enabled by PACKAGECONFIG
+diff --git a/recipes-qt/qt5/qtsystems.inc b/recipes-qt/qt5/qtsystems.inc
+index 7d0b3eb..91e0a9e 100644
+--- a/recipes-qt/qt5/qtsystems.inc
++++ b/recipes-qt/qt5/qtsystems.inc
+@@ -2,8 +2,8 @@ require qt5.inc
+ 
+ DEPENDS += "qtbase qtdeclarative udev bluez4 gconf"
+ 
+-DEPENDS_remove_dunfell = " bluez4 "
+-DEPENDS_append_dunfell = " bluez5 "
++DEPENDS:remove:dunfell = " bluez4 "
++DEPENDS:append:dunfell = " bluez5 "
+ 
+ LICENSE = "BSD & LGPL-2.1 & GFDL-1.3"
+ # LICENSE files are missing in 5.0.0
+@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://${S}/src/imports/systeminfo/qsysteminfo.cpp;endline=4
+                     file://${S}/doc/src/systeminfo/systeminfo.qdoc;endline=26;md5=757f4eda130ceff3ca0985dde715af07 \
+ "
+ 
+-do_install_append() {
++do_install:append() {
+     # Remove example.pro file as it is useless
+     rm -f ${D}${OE_QMAKE_PATH_EXAMPLES}/examples.pro	
+ }
+diff --git a/recipes-qt/qt5/qtwayland.inc b/recipes-qt/qt5/qtwayland.inc
+index abeb15f..bf53e4b 100644
+--- a/recipes-qt/qt5/qtwayland.inc
++++ b/recipes-qt/qt5/qtwayland.inc
+@@ -4,7 +4,7 @@ require qt5.inc
+ # explicitly, because it's native wayland-scanner we're looking for
+ # libxkbcommon isn't mandatory make it easier to remove by .bbappend
+ # (e.g. for building qtwayland with danny which doesn't have libxkbcommon in oe-core).
+-XKB_DEPENDS = "libxkbcommon xproto"
++XKB_DEPENDS = "libxkbcommon xorgproto"
+ DEPENDS += "qtbase qtdeclarative wayland wayland-native qtwayland-native ${XKB_DEPENDS}"
+ 
+ QT_WAYLAND_CONFIG ?= "wayland-compositor"
+diff --git a/recipes-qt/qt5/qtwebkit-5.1.1.inc b/recipes-qt/qt5/qtwebkit-5.1.1.inc
+index cf805ce..e6f0ce0 100644
+--- a/recipes-qt/qt5/qtwebkit-5.1.1.inc
++++ b/recipes-qt/qt5/qtwebkit-5.1.1.inc
+@@ -14,7 +14,7 @@ PACKAGECONFIG[qtlocation] = "OE_QTLOCATION_ENABLED,,qtlocation"
+ PACKAGECONFIG[qtmultimedia] = "OE_QTMULTIMEDIA_ENABLED,,qtmultimedia"
+ PACKAGECONFIG[qtsensors] = "OE_QTSENSORS_ENABLED,,qtsensors"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     export QMAKE_CACHE_EVAL="CONFIG+=${EXTRA_OECONF}"
+     # disable gstreamer-1.0 test if it isn't enabled by PACKAGECONFIG
+     sed -e 's/\s\(packagesExist(".*\<gstreamer-1.0\>.*")\)/ OE_GSTREAMER_ENABLED:\1/' -i ${S}/Tools/qmake/mkspecs/features/features.prf
+diff --git a/recipes-qt/qt5/qtwebkit.inc b/recipes-qt/qt5/qtwebkit.inc
+index 76db595..ebfcaf2 100644
+--- a/recipes-qt/qt5/qtwebkit.inc
++++ b/recipes-qt/qt5/qtwebkit.inc
+@@ -15,7 +15,7 @@ PACKAGECONFIG[qtmultimedia] = "OE_QTMULTIMEDIA_ENABLED,,qtmultimedia"
+ PACKAGECONFIG[qtsensors] = "OE_QTSENSORS_ENABLED,,qtsensors"
+ PACKAGECONFIG[libwebp] = "OE_LIBWEBP_ENABLED,,libwebp"
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+     export QMAKE_CACHE_EVAL="CONFIG+=${EXTRA_OECONF}"
+     # disable gstreamer-1.0 test if it isn't enabled by PACKAGECONFIG
+     sed -e 's/\s\(packagesExist(".*\<gstreamer-1.0\>.*")\)/ OE_GSTREAMER_ENABLED:\1/' -i ${S}/Tools/qmake/mkspecs/features/features.prf
+diff --git a/recipes-qt/qt5/qtwebkit_5.1.1.bb b/recipes-qt/qt5/qtwebkit_5.1.1.bb
+index 27a0266..debab5e 100644
+--- a/recipes-qt/qt5/qtwebkit_5.1.1.bb
++++ b/recipes-qt/qt5/qtwebkit_5.1.1.bb
+@@ -11,7 +11,7 @@ S = "${WORKDIR}/git/source/qtwebkit"
+ 
+ require ${PN}-${PV}.inc
+ 
+-do_configure_prepend() {
++do_configure:prepend() {
+ 	rm -rf ${S}/../../components ${S}/../../qtbrowser \
+                ${S}/../../webtests ${S}/../qtwebengine/ \
+                ${S}/../qtimageformats ${S}/../qtwebkit-examples/ \
