@@ -306,10 +306,10 @@ index e609da2..72d2067 100644
      ### TODO: FIX
      # qemu built on host breaks do_package, remove it here (will be replaces with right qemu when do_compile is fixed
 diff --git a/recipes-qt/qt5/qtbase_5.1.1.bb b/recipes-qt/qt5/qtbase_5.1.1.bb
-index 9df383e..f07e00c 100644
+index 9df383e..73af2f9 100644
 --- a/recipes-qt/qt5/qtbase_5.1.1.bb
 +++ b/recipes-qt/qt5/qtbase_5.1.1.bb
-@@ -15,12 +15,11 @@ require ${PN}-${PV}.inc
+@@ -15,12 +15,10 @@ require ${PN}-${PV}.inc
  
  PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
  
@@ -317,7 +317,6 @@ index 9df383e..f07e00c 100644
 -LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
 +DEPENDS:remove = "directfb"
 +DEPENDS:append = " virtual/egl virtual/libgles2"
-+EXTRA_OECONF:append = " -device-option RDK_PLATFORM_PWD=${S}/.."
  
 -DEPENDS_remove = "virtual/egl virtual/libgles2 directfb"
 -
