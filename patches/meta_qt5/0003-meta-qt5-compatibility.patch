@@ -313,7 +313,6 @@ index 9df383e..9cf25b8 100644
  require ${PN}-${PV}.inc
  
  PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
-+EXTRA_OECONF:append = " -device-option RDK_PLATFORM_PWD=${S}/../default_platform"
  
 -inherit install-layer-dependent-ipk
 -LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
