@@ -306,13 +306,14 @@ index e609da2..72d2067 100644
      ### TODO: FIX
      # qemu built on host breaks do_package, remove it here (will be replaces with right qemu when do_compile is fixed
 diff --git a/recipes-qt/qt5/qtbase_5.1.1.bb b/recipes-qt/qt5/qtbase_5.1.1.bb
-index 9df383e..9cf25b8 100644
+index 9df383e..e3548a6 100644
 --- a/recipes-qt/qt5/qtbase_5.1.1.bb
-+++ b/recipes-qt/qt5/qtbase_5.1.1.bb
-@@ -14,13 +14,12 @@ S = "${WORKDIR}/git/source/qtbase"
++++ b/recipes-qt/qtbase_5.1.1.bb
+@@ -14,16 +14,14 @@ S = "${WORKDIR}/git/source/qtbase"
  require ${PN}-${PV}.inc
  
  PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
++EXTRA_OECONF:append = " -device-option RDK_PLATFORM_PWD=${S}/../default_platform"
  
 -inherit install-layer-dependent-ipk
 -LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
@@ -323,9 +324,13 @@ index 9df383e..9cf25b8 100644
 -
 -do_configure_prepend() {
 +do_configure:prepend() {
- 	rm -rf ${S}/../../components ${S}/../../qtbrowser \
+       rm -rf ${S}/../../components ${S}/../../qtbrowser \
                 ${S}/../../webtests ${S}/../qtwebengine/ \
                 ${S}/../qtimageformats ${S}/../qtwebkit-examples/ \
+-               ${S}/../default_platform ${S}/../qtwebkit \
++               ${S}/../qtwebkit \
+                ${S}/../qt.pro ${S}/../configure
+ }
 diff --git a/recipes-qt/qt5/qtconnectivity.inc b/recipes-qt/qt5/qtconnectivity.inc
 index a92290f..d8927ac 100644
 --- a/recipes-qt/qt5/qtconnectivity.inc
