@@ -308,7 +308,7 @@ index e609da2..72d2067 100644
 diff --git a/recipes-qt/qt5/qtbase_5.1.1.bb b/recipes-qt/qt5/qtbase_5.1.1.bb
 index 9df383e..e3548a6 100644
 --- a/recipes-qt/qt5/qtbase_5.1.1.bb
-+++ b/recipes-qt/qtbase_5.1.1.bb
++++ b/recipes-qt/qt5/qtbase_5.1.1.bb
 @@ -14,16 +14,14 @@ S = "${WORKDIR}/git/source/qtbase"
  require ${PN}-${PV}.inc
  
@@ -324,11 +324,10 @@ index 9df383e..e3548a6 100644
 -
 -do_configure_prepend() {
 +do_configure:prepend() {
-       rm -rf ${S}/../../components ${S}/../../qtbrowser \
+ 	rm -rf ${S}/../../components ${S}/../../qtbrowser \
                 ${S}/../../webtests ${S}/../qtwebengine/ \
                 ${S}/../qtimageformats ${S}/../qtwebkit-examples/ \
 -               ${S}/../default_platform ${S}/../qtwebkit \
-+               ${S}/../qtwebkit \
                 ${S}/../qt.pro ${S}/../configure
  }
 diff --git a/recipes-qt/qt5/qtconnectivity.inc b/recipes-qt/qt5/qtconnectivity.inc
