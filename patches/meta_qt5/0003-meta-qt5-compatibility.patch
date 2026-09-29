@@ -306,12 +306,14 @@ index e609da2..72d2067 100644
      ### TODO: FIX
      # qemu built on host breaks do_package, remove it here (will be replaces with right qemu when do_compile is fixed
 diff --git a/recipes-qt/qt5/qtbase_5.1.1.bb b/recipes-qt/qt5/qtbase_5.1.1.bb
-index 9df383e..73af2f9 100644
+index 9df383e..9cf25b8 100644
 --- a/recipes-qt/qt5/qtbase_5.1.1.bb
 +++ b/recipes-qt/qt5/qtbase_5.1.1.bb
-@@ -15,12 +15,10 @@ require ${PN}-${PV}.inc
+@@ -14,13 +14,12 @@ S = "${WORKDIR}/git/source/qtbase"
+ require ${PN}-${PV}.inc
  
  PACKAGE_ARCH = "${MIDDLEWARE_ARCH}"
++EXTRA_OECONF:append = " -device-option RDK_PLATFORM_PWD=${S}/.."
  
 -inherit install-layer-dependent-ipk
 -LAYER_DEPENDS = " libgles-eabihf-dvalin-wayland-drm libgles-eabihf-dvalin-wayland-drm-dev"
