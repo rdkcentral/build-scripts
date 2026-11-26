@@ -42,7 +42,7 @@ fi
 MANIFEST_PATH_PRODUCT="$(dirname -- ${MANIFEST_PATH_PRODUCT_LAYER} || echo "$MANIFEST_PATH_MACHINE_CONF_LAYER")"
 
 # check that we are where we think we are!
-if [ ! -f "$MANIFEST_PATH_POKY/oe-init-build-env" ]; then
+if [ ! -f "$MANIFEST_PATH_OPENEMBEDDED_CORE/oe-init-build-env" ]; then
     echo -e "\nUNABLE TO FIND OPENEMBEDDED !"
     return 1
 fi
@@ -60,7 +60,7 @@ EOF
 export PATH="`echo ${PATH} | sed 's/\(:.\|:\)*:/:/g;s/^.\?://;s/:.\?$//'`"
 
 # Clean PATH of any previous oe-core bitbake or scripts directories
-export PATH="$(echo $PATH | sed 's!/[^:]\+/$MANIFEST_PATH_POKY/\(bitbake/bin\|scripts\):!!g')"
+export PATH="$(echo $PATH | sed 's!/[^:]\+/$MANIFEST_PATH_BITBAKE/\(bitbake/bin\|scripts\):!!g')"
 
 # only 1 parameter max, <build> folder, or default to build-$machine
 _BUILDDIR=
@@ -128,7 +128,7 @@ then
 fi
 
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
-TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/template/ source $MANIFEST_PATH_POKY/oe-init-build-env ${_BUILDDIR}
+TEMPLATECONF=$MANIFEST_PATH_BBLAYERS_TEMPLATE/conf/templates/wrynose/ source $MANIFEST_PATH_OPENEMBEDDED_CORE/oe-init-build-env ${_BUILDDIR}
 
 if [ "$_CONFIGS_FOUND" ]; then
     echo -e "\nConfig files already exist in folder ${_BUILDDIR}/conf/, they were not modified."
@@ -142,8 +142,9 @@ fi
 # bitbake released with OE 2.0) with OE 1.6. We need to account for that here,
 # ie bitbake version 1.28 needs to map to "daisy", not "jethro".
 
-case "$(sed -n 's/^__version__ = "\(.*\)"/\1/p' $MANIFEST_PATH_POKY/bitbake/bin/bitbake)"
+case "$(sed -n 's/^__version__ = "\(.*\)"/\1/p' $MANIFEST_PATH_BITBAKE/bin/bitbake)"
 in
+    2.18.*) _DISTRO_CODENAME="wrynose" ;;
     2.0.*) _DISTRO_CODENAME="kirkstone" ;;
     2.2.*) _DISTRO_CODENAME="kirkstone" ;;
     1.46.*) _DISTRO_CODENAME="dunfell" ;;
