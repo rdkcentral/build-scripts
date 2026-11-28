@@ -239,6 +239,28 @@ if [ -f "$mul_hooks" ]; then
 fi
 )
 
+# QT5.1 commit checkout
+QT5_1_ENABLED="${QT5_1_ENABLED:-true}"
+
+if [ "$QT5_1_ENABLED" = "true" ]; then
+    echo "====================================="
+    echo "QT5.1 mode enabled"
+    echo "====================================="
+
+    current_dir="$(pwd)"
+    meta_qt5_dir="${current_dir}/../rdke/middleware/cspc/meta-qt5"
+
+    if [ ! -d "${meta_qt5_dir}/.git" ]; then
+        echo "ERROR: meta-qt5 repository not found"
+        return 1
+    fi
+
+    QT5_1_COMMIT="fd510d2e0841e5cb98a06439f9e8e29a7ce241bd"
+    git -C "${meta_qt5_dir}" checkout --detach "${QT5_1_COMMIT}" || return 1
+
+    echo "Checked out meta-qt5 at QT5.1 commit: ${QT5_1_COMMIT}"
+fi
+
 # Since this script is sourced, be careful not to pollute caller's environment with temp variables
 unset -f usage
 unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV _VALID_MACHINES _NCPU _BSP MACHINE _LAYERS _MACH_CONF _BSP_LAYER_REQUIRED _DISTRO_CODENAME
